@@ -1,0 +1,324 @@
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap");
+
+:root {
+  --bg: #0d0f0e;
+  --surface: #151816;
+  --surface-light: #1d211e;
+  --text: #e5e2d8;
+  --muted: #9b9c93;
+  --gold: #c4a35a;
+  --gold-light: #e0c77c;
+  --red: #7c2929;
+  --border: rgba(196, 163, 90, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(196, 163, 90, 0.07),
+      transparent 35rem
+    ),
+    var(--bg);
+  color: var(--text);
+  font-family: "Inter", sans-serif;
+  line-height: 1.8;
+}
+
+.site-header {
+  height: 70px;
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #090b0a;
+  border-bottom: 1px solid var(--border);
+}
+
+.site-logo {
+  color: var(--gold-light);
+  font-family: "Cinzel", serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+}
+
+.site-header nav {
+  display: flex;
+  gap: 30px;
+}
+
+.site-header nav a {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-header nav a:hover {
+  color: var(--gold-light);
+}
+
+@media (max-width: 600px) {
+  .site-header {
+    height: 60px;
+    padding: 0 20px;
+  }
+
+  .site-logo {
+    font-size: 0.8rem;
+  }
+
+  .site-header nav {
+    gap: 15px;
+  }
+
+  .site-header nav a {
+    font-size: 0.7rem;
+  }
+}
+.hero {
+  position: relative;
+  height: min(68vh, 680px);
+  min-height: 460px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  isolation: isolate;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: -3;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(
+      to top,
+      rgba(13, 15, 14, 0.98) 0%,
+      rgba(13, 15, 14, 0.72) 30%,
+      rgba(13, 15, 14, 0.15) 75%
+    ),
+    linear-gradient(90deg, rgba(13, 15, 14, 0.55), transparent 65%);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  transform: translateX(-50%);
+}
+
+.hero-content {
+  width: min(1100px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 80px 0 70px;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--gold-light);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+}
+
+h1 {
+  max-width: 900px;
+  margin: 0;
+  color: #f1eee4;
+  font-family: "Cinzel", serif;
+  font-size: clamp(2.5rem, 6vw, 5.4rem);
+  font-weight: 600;
+  line-height: 1.05;
+  text-shadow: 0 4px 25px rgba(0, 0, 0, 0.65);
+}
+
+.hero-content p {
+  max-width: 650px;
+  margin: 22px 0 0;
+  color: #c8c7bf;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+}
+
+.post {
+  width: min(800px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 70px 0 90px;
+}
+
+article {
+  position: relative;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  color: var(--gold);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+
+p {
+  margin: 0 0 26px;
+  color: #c5c5bd;
+  font-size: 1.04rem;
+}
+
+.lead {
+  color: #e2dfd5;
+  font-family: "Cinzel", serif;
+  font-size: 1.35rem;
+  line-height: 1.65;
+  margin-bottom: 34px;
+}
+
+article p:not(.lead)::first-letter {
+  color: var(--gold-light);
+}
+
+.gallery {
+  position: relative;
+  width: 100%;
+  margin-top: 65px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.gallery-track {
+  display: flex;
+  width: 300%;
+  animation: witcher-carousel 15s infinite;
+}
+
+.slide {
+  position: relative;
+  width: 33.333333%;
+  aspect-ratio: 16 / 9;
+  margin: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent 50%);
+  pointer-events: none;
+}
+
+.slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes witcher-carousel {
+  0%,
+  27% {
+    transform: translateX(0);
+  }
+
+  33%,
+  60% {
+    transform: translateX(-33.333333%);
+  }
+
+  66%,
+  94% {
+    transform: translateX(-66.666666%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+footer {
+  padding: 38px 20px;
+  border-top: 1px solid var(--border);
+  background: #090b0a;
+  text-align: center;
+}
+
+footer p {
+  margin: 3px 0;
+  color: #70736d;
+  font-size: 0.8rem;
+}
+
+footer p:last-child {
+  color: var(--gold);
+  font-family: "Cinzel", serif;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .hero {
+    min-height: 420px;
+  }
+
+  .hero-content {
+    padding-bottom: 50px;
+  }
+
+  .post {
+    padding-top: 50px;
+  }
+
+  .post-meta {
+    font-size: 0.68rem;
+  }
+
+  .lead {
+    font-size: 1.15rem;
+  }
+
+  p {
+    font-size: 0.98rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .gallery-track {
+    animation: none;
+  }
+}
