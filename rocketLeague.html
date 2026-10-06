@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rocket League 2D</title>
+  <style>
+:root {
+  --night: #0d1226;
+  --panel: #171e3d;
+  --blue: #2f7bff;
+  --orange: #ff7a2f;
+  --text: #eef1ff;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  display: grid;
+  place-items: center;
+  background: var(--night);
+  color: var(--text);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+}
+main { position: relative; width: min(900px, 100vw); }
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 2px solid var(--panel);
+}
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+.team b { font-size: 2rem; margin: 0 6px; }
+.blue { color: var(--blue); }
+.orange { color: var(--orange); }
+#mid { text-align: center; }
+#level { font-size: 0.85rem; opacity: 0.85; }
+.panel { position: absolute; inset: 52px 0 36px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; text-align: center; background: rgba(13, 18, 38, 0.9); border-radius: 8px; }
+.panel.hidden { display: none; }
+.logo { margin: 0 0 4px; font-size: 3.2rem; line-height: 0.95; letter-spacing: 3px; background: linear-gradient(90deg, #2f7bff, #ff7a2f); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.logo span { font-size: 1.4rem; letter-spacing: 9px; }
+.big { width: 260px; padding: 12px; font-size: 1.05rem; border-radius: 12px; }
+.help { text-align: left; font-size: 0.9rem; line-height: 1.8; max-width: 520px; }
+#menuInfo { margin-bottom: 6px; opacity: 0.85; }
+.row { display: flex; gap: 10px; }
+.ghost { background: transparent; color: var(--text); border: 2px solid var(--text); }
+#pw { min-width: 150px; text-align: center; font-size: 0.85rem; }
+#coins { font-weight: bold; }
+#garage { position: absolute; inset: 52px 0 36px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 12px; text-align: center; background: rgba(13, 18, 38, 0.97); border-radius: 8px; }
+#garage.hidden { display: none; }
+h2 { margin: 0; color: var(--orange); }
+#preview { width: 260px; height: 130px; border: 0; background: radial-gradient(circle, #243066, #0d1226); border-radius: 10px; }
+#carName { font-size: 1.2rem; font-weight: bold; }
+.stat { display: flex; align-items: center; gap: 8px; width: 250px; font-size: 0.8rem; }
+.stat span { width: 70px; text-align: left; }
+.stat div { flex: 1; height: 6px; background: var(--panel); border-radius: 3px; overflow: hidden; }
+.stat i { display: block; height: 100%; background: var(--orange); }
+#cards { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 560px; }
+.card { padding: 6px 12px; font-size: 0.8rem; color: var(--text); background: var(--panel); border: 2px solid var(--panel); border-radius: 10px; }
+.card.sel { border-color: var(--orange); }
+.card.locked { opacity: 0.7; }
+#time { font-variant-numeric: tabular-nums; }
+.boost { display: flex; align-items: center; gap: 10px; padding: 8px 4px; }
+.boost div { flex: 1; height: 12px; background: var(--panel); border-radius: 6px; overflow: hidden; }
+#boostBar { display: block; height: 100%; width: 100%; background: var(--orange); }
+#overlay {
+  position: absolute;
+  inset: 52px 0 36px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  background: rgba(13, 18, 38, 0.88);
+  border-radius: 8px;
+}
+#overlay.hidden { display: none; }
+h1 { margin: 0; font-size: 2.6rem; color: var(--orange); }
+p { margin: 0; max-width: 40ch; line-height: 1.5; }
+small { opacity: 0.7; }
+button {
+  padding: 12px 40px;
+  font: inherit;
+  font-weight: bold;
+  color: var(--night);
+  background: var(--orange);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+button:hover { filter: brightness(1.1); }
+button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+</style>
+</head>
+<body>
+  <main>
+    <header class="hud">
+      <span class="team blue">Azul <b id="scoreBlue">0</b></span>
+      <div id="mid"><div id="level">Nivel 1</div><div id="time">2:00</div></div>
+      <span class="team orange"><b id="scoreOrange">0</b> Naranja</span>
+    </header>
+    <canvas id="game" width="900" height="500"></canvas>
+    <div class="boost"><span>Turbo</span><div><i id="boostBar"></i></div><span id="pw"></span><span id="coins">🪙 0</span></div>
+    <div id="overlay" class="hidden">
+      <h1>Rocket League 2D</h1>
+      <p id="msg">Mete la pelota en la portería naranja antes de que acabe el tiempo.</p>
+      <div class="row"><button id="start">Jugar</button><button id="garageBtn" class="ghost">Garaje</button><button id="toMenu" class="ghost">Menú</button></div>
+      
+    </div>
+    <div id="menu" class="panel">
+      <h1 class="logo">ROCKET<br><span>LEAGUE 2D</span></h1>
+      <p id="menuInfo"></p>
+      <button id="mCareer" class="big">Carrera</button>
+      <button id="mQuick" class="big">Partido rápido</button>
+      <button id="mVersus" class="big">2 jugadores</button>
+      <button id="mPractice" class="big">Práctica</button>
+      <div class="row"><button id="mGarage" class="ghost">Garaje</button><button id="mSettings" class="ghost">Ajustes</button><button id="mHelp" class="ghost">Controles</button></div>
+    </div>
+    <div id="quick" class="panel hidden">
+      <h2>Partido rápido</h2>
+      <p>Elige la dificultad del rival</p>
+      <button id="q1" class="big">Fácil</button>
+      <button id="q3" class="big">Normal</button>
+      <button id="q5" class="big">Difícil</button>
+      <button id="q8" class="big">Imposible</button>
+      <button id="qBack" class="ghost">Volver</button>
+    </div>
+    <div id="settings" class="panel hidden">
+      <h2>Ajustes</h2>
+      <button id="sPw" class="big"></button>
+      <button id="sTime" class="big"></button>
+      <button id="sSound" class="big"></button>
+      <button id="sBack" class="ghost">Volver</button>
+    </div>
+    <div id="help" class="panel hidden">
+      <h2>Controles</h2>
+      <div class="help">
+        <b>Jugador 1:</b> A / D mover · W o Espacio saltar (mantén para saltar más) · Shift turbo<br>
+        <b>Voltereta:</b> en el aire, dirección + salto = impulso con giro<br>
+        <b>Jugador 2:</b> ← → mover · ↑ saltar · Shift derecho o Enter turbo<br>
+        <b>Demolición:</b> embiste con turbo a toda velocidad y el rival explota<br>
+        <b>Pads:</b> pisa los pads naranjas para recargar turbo (los grandes dan más)<br>
+        <b>Orbes:</b> 💥 mega golpe · 🧲 imán · ⚡ turbo infinito · 🧊 congelar<br>
+        <b>Esc o P:</b> pausa
+      </div>
+      <button id="hBack" class="ghost">Volver</button>
+    </div>
+    <div id="pause" class="panel hidden">
+      <h2>Pausa</h2>
+      <button id="pResume" class="big">Continuar</button>
+      <button id="pMenu" class="ghost">Salir al menú</button>
+    </div>
+    <div id="garage" class="hidden">
+      <h2>Garaje</h2>
+      <div id="coinsG"></div>
+      <canvas id="preview" width="260" height="130"></canvas>
+      <div id="carName"></div>
+      <div id="stats"></div>
+      <div id="cards"></div>
+      <div class="row"><button id="pick">Elegir</button><button id="closeG" class="ghost">Volver</button></div>
+    </div>
+  </main>
+  <script>
+const canvas = document.getElementById("game");
+let ctx = canvas.getContext("2d");
+const $ = (id) => document.getElementById(id);
+
+const W = 900, H = 500;
+const L = 50, R = W - 50;          // límites del campo
+const FLOOR = 440, GOAL_H = 150;   // suelo y altura de la portería
+const BR = 22;                      // radio de la pelota
+const CW = 64, CH = 28;             // tamaño del coche
+const MATCH_TIME = 120;
+
+const keys = {};
+const NAMES = ["Novato", "Aficionado", "Jugador", "Veterano", "Experto", "Pro", "Leyenda", "Imposible"];
+function levelCfg(n) {
+  const skill = Math.min(1, 0.2 + 0.1 * (n - 1)), extra = Math.max(0, n - 9) * 0.02;
+  return {
+    name: NAMES[Math.min(n - 1, 7)], skill,
+    speed: Math.min(1.3, 0.62 + 0.38 * skill + extra),
+    react: Math.max(0.03, 0.5 - 0.45 * skill),
+    err: 100 * (1 - skill),
+    jumpP: 0.03 + 0.25 * skill,
+    time: 90,
+  };
+}
+const CARS = [
+  { id: "octane", name: "Octane", price: 0, color: "#2f7bff", body: 0, speed: 1, jump: 1, accel: 1, power: 1, trail: null },
+  { id: "dominus", name: "Dominus", price: 200, color: "#e63946", body: 1, speed: 1.05, jump: 0.95, accel: 1, power: 1.12, trail: null },
+  { id: "fenix", name: "Fénix", price: 400, color: "#a855f7", body: 2, speed: 1, jump: 1.12, accel: 1.1, power: 0.95, trail: "#c084fc" },
+  { id: "titan", name: "Titán", price: 650, color: "#22c55e", body: 1, speed: 0.95, jump: 0.95, accel: 1, power: 1.3, trail: null },
+  { id: "dorado", name: "Dorado", price: 1000, color: "#ffd84d", body: 0, speed: 1.08, jump: 1.05, accel: 1.1, power: 1.1, trail: "#ffd84d" },
+  { id: "fantasma", name: "Fantasma", price: 1800, color: "#bfe9ff", body: 2, speed: 1.12, jump: 1.1, accel: 1.2, power: 1.15, trail: "#7fd8ff" },
+];
+const PW = {
+  mega: { icon: "💥", name: "Mega golpe", color: "#ff4d4d" },
+  magnet: { icon: "🧲", name: "Imán", color: "#b66bff", dur: 4 },
+  unlim: { icon: "⚡", name: "Turbo infinito", color: "#ffd84d", dur: 5 },
+  freeze: { icon: "🧊", name: "Congelar rival", color: "#7fd8ff" },
+};
+const THEMES = [
+  { sky: ["#060919", "#131b48", "#261b55"], grass: ["#18793e", "#14663a"] },
+  { sky: ["#2b0f3a", "#8a2f5f", "#ff8a4c"], grass: ["#2a7a3a", "#236a33"] },
+  { sky: ["#02040f", "#0b2a4f", "#00c2ff"], grass: ["#0f5d6b", "#0c4f5c"] },
+  { sky: ["#0f1b33", "#3b5b87", "#9fcdf0"], grass: ["#7fb6d6", "#6aa5c9"] },
+];
+let save = { coins: 0, owned: ["octane"], car: "octane", streak: 0, settings: { pw: true, time: 90, sound: true } };
+try { Object.assign(save, JSON.parse(localStorage.getItem("rocketSave") || "{}")); } catch (e) {}
+save.settings = Object.assign({ pw: true, time: 90, sound: true }, save.settings);
+function sfx(kind) {
+  if (!save.settings.sound) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const T = {
+      hit: [[170, 0.08, "square", 0.1]],
+      pad: [[600, 0.07, "sine", 0.1], [900, 0.1, "sine", 0.1]],
+      power: [[700, 0.08, "triangle", 0.15], [1050, 0.12, "triangle", 0.15]],
+      goal: [[392, 0.15, "triangle", 0.2], [523, 0.15, "triangle", 0.2], [659, 0.35, "triangle", 0.2]],
+      boom: [[90, 0.4, "sawtooth", 0.25]],
+    };
+    let t = actx.currentTime;
+    for (const [f, d, type, v] of T[kind]) {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + d);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + d);
+      t += d * 0.8;
+    }
+  } catch (e) {}
+}
+function persist() { try { localStorage.setItem("rocketSave", JSON.stringify(save)); } catch (e) {} }
+function curLevel() { return mode === "quick" ? quickLvl : level; }
+let bestLevel = 1;
+try { bestLevel = Number(localStorage.getItem("rocketLevel")) || 1; } catch (e) {}
+let level = 1, cfg = levelCfg(1), pads = [], aiT = 0, aiTarget = null;
+let orb = null, orbT = 10, matchCoins = 0, toast = "", toastT = 0, slowT = 0, flash = 0;
+let mode = "career", quickLvl = 1, matchActive = false, garageFrom = "menu", lastHit = 0, actx = null;
+let player, ai, ball, scores, timeLeft, overtime, state, stateTimer, running, last, msgText;
+
+function makeCar(x, dir, color) {
+  return { x, y: FLOOR - CH / 2, vx: 0, vy: 0, dir, color, boost: 100, jumps: 0, onGround: true, boosting: false, spawnX: x };
+}
+
+function kickoff() {
+  const pm = CARS.find((c) => c.id === save.car) || CARS[0];
+  player = makeCar(L + 200, 1, pm.color);
+  Object.assign(player, { model: pm, maxMul: pm.speed, jumpMul: pm.jump, accelMul: pm.accel, power: pm.power });
+  ai = makeCar(R - 200, -1, "#ff7a2f");
+  ai.model = Object.assign({}, CARS[(curLevel() - 1) % CARS.length], { trail: null });
+  ai.maxMul = mode === "versus" ? 1 : cfg.speed;
+  if (mode === "practice") ai.dead = 1e9;
+  aiT = 0; aiTarget = null;
+  ball = { x: W / 2, y: 200, vx: 0, vy: 0 };
+  ballTrail.length = 0;
+  state = "countdown";
+  stateTimer = 3;
+}
+
+function newMatch() {
+  scores = { blue: 0, orange: 0 };
+  cfg = levelCfg(curLevel());
+  timeLeft = mode === "practice" ? Infinity : save.settings.time;
+  pads = [{ x: L + 90, big: true }, { x: L + 300 }, { x: W / 2 }, { x: R - 300 }, { x: R - 90, big: true }].map((p) => ({ ...p, t: 0 }));
+  orb = null; orbT = 10; matchCoins = 0;
+  buildBg(THEMES[(curLevel() - 1) % THEMES.length]);
+  overtime = false;
+  kickoff();
+  updateHud();
+}
+
+function updateHud() {
+  $("scoreBlue").textContent = scores.blue;
+  $("scoreOrange").textContent = scores.orange;
+  const t = Math.max(0, Math.ceil(timeLeft));
+  $("time").textContent = timeLeft === Infinity ? "∞" : overtime ? "Tiempo extra" : `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
+  $("boostBar").style.width = player.boost + "%";
+  $("level").textContent = mode === "career" ? `Nivel ${level} · ${cfg.name}` : mode === "quick" ? `Rival ${cfg.name}` : mode === "versus" ? "2 jugadores" : "Práctica";
+  $("coins").textContent = "🪙 " + (save.coins + matchCoins);
+  $("pw").textContent = player.pw ? PW[player.pw.type].icon + " " + PW[player.pw.type].name + (player.pw.type === "mega" ? "" : " " + Math.ceil(player.pw.t) + "s") : (toastT > 0 ? toast : "");
+}
+
+function jump(car, m = 0) {
+  if ((car.freeze || 0) > 0) return;
+  const jm = car.jumpMul || 1;
+  if (car.onGround) { car.vy = -560 * jm; car.jumps = 1; car.onGround = false; car.jumpT = 0.16; }
+  else if (car.jumps < 2) {
+    car.jumps = 2;
+    if (m) { car.vx = m * 640; car.vy = -240; car.flip = 0.45; car.flipDir = m; } // dash con voltereta
+    else car.vy = -520 * jm;
+  }
+}
+
+function moveCar(car, move, boost, dt) {
+  if ((car.freeze || 0) > 0) { move = 0; boost = false; }
+  if (move) car.dir = Math.sign(move);
+  car.vx += move * (car.onGround ? 1800 : 700) * dt;
+  if (!move && car.onGround) car.vx *= 1 - Math.min(1, 3 * dt);
+
+  const unlim = car.pw && car.pw.type === "unlim";
+  car.boosting = boost && (car.boost > 0 || unlim);
+  if (car.boosting) {
+    car.vx += car.dir * 2600 * (car.accelMul || 1) * dt;
+    if (!car.onGround) car.vy -= 1500 * dt;
+    if (!unlim) car.boost = Math.max(0, car.boost - 35 * dt);
+  } else if (car.onGround) {
+    car.boost = Math.min(100, car.boost + 5 * dt);
+  }
+
+  const max = Math.max((car.boosting ? 820 : 520) * (car.maxMul || 1), car.flip > 0 ? 700 : 0);
+  car.vx = Math.max(-max, Math.min(max, car.vx));
+  car.vy += 1400 * dt;
+  car.x += car.vx * dt;
+  car.y += car.vy * dt;
+  car.wheel = (car.wheel || 0) + car.vx * dt / 7;
+  if (car.boosting) addFlame(car);
+  car.flip = Math.max(0, (car.flip || 0) - dt);
+  if (car.model && car.model.trail && Math.abs(car.vx) > 300) addTrail(car);
+
+  if (car.y + CH / 2 >= FLOOR) { car.y = FLOOR - CH / 2; car.vy = 0; car.onGround = true; car.jumps = 0; }
+  else car.onGround = false;
+  if (car.y - CH / 2 < 0) { car.y = CH / 2; car.vy = 0; }
+  car.x = Math.max(L + CW / 2, Math.min(R - CW / 2, car.x));
+}
+
+function holdJump(car, held, dt) {
+  if (held && car.jumpT > 0 && car.vy < 0) { car.vy -= 1100 * dt; car.jumpT -= dt; }
+  else car.jumpT = 0;
+}
+
+function demolish(c) {
+  c.dead = 2.5; c.pw = null; c.boosting = false;
+  for (let i = 0; i < 50; i++) particles.push({
+    x: c.x, y: c.y, vx: (Math.random() - 0.5) * 700, vy: (Math.random() - 0.8) * 600,
+    life: 0.9, max: 0.9, size: 3 + Math.random() * 4, color: ["#ffb14a", "#ff5a1f", "#fff", c.color][(Math.random() * 4) | 0], g: 900, sq: true,
+  });
+  shake = 16; sfx("boom"); toast = "💥 ¡Demolición!"; toastT = 1.5;
+}
+
+function carVsCar() {
+  if (player.dead > 0 || ai.dead > 0) return;
+  const dx = ai.x - player.x, dy = ai.y - player.y;
+  if (Math.abs(dx) >= CW || Math.abs(dy) >= CH) return;
+  const fast = (a, b) => a.boosting && Math.abs(a.vx) > 620 && (b.x - a.x) * a.vx > 0;
+  if (fast(player, ai) && !fast(ai, player)) return demolish(ai);
+  if (fast(ai, player) && !fast(player, ai)) return demolish(player);
+  const sg = dx >= 0 ? 1 : -1, push = (CW - Math.abs(dx)) / 2 + 1;
+  player.x -= sg * push; ai.x += sg * push;
+  const pv = player.vx; player.vx = ai.vx * 0.6; ai.vx = pv * 0.6;
+}
+
+function givePower(c, type) {
+  const me = c === player;
+  if (type === "freeze") (me ? ai : player).freeze = 2.5;
+  else c.pw = { type, t: type === "mega" ? 12 : PW[type].dur };
+  toast = (me ? "" : "Rival: ") + PW[type].icon + " " + PW[type].name;
+  toastT = 1.8;
+  sfx("power");
+}
+
+function aiThink(dt) {
+  const k = cfg;
+  aiT -= dt;
+  if (aiT <= 0 || !aiTarget) {
+    aiT = k.react;
+    const lead = 0.4 * k.skill;
+    aiTarget = { x: ball.x + ball.vx * lead + (Math.random() - 0.5) * k.err, y: ball.y + ball.vy * lead };
+  }
+  const tx = aiTarget.x, ty = aiTarget.y;
+  let dest = tx > ai.x + 20 ? tx + 80 : tx + 10; // rodear la pelota y empujarla a la izquierda
+  if (ai.boost < 25 && Math.abs(ball.x - ai.x) > 260) {
+    const pad = pads.filter((p) => p.t === 0).sort((p, q) => Math.abs(p.x - ai.x) - Math.abs(q.x - ai.x))[0];
+    if (pad && Math.abs(pad.x - ai.x) < 450) dest = pad.x;
+  }
+  const d = dest - ai.x, dx = Math.abs(ball.x - ai.x);
+  const move = (Math.abs(d) < 12 ? 0 : Math.sign(d)) * (0.6 + 0.4 * k.skill);
+  const boost = k.skill > 0.3 && ai.boost > 15 && (Math.abs(d) > 240 || (k.skill > 0.6 && ty < ai.y - 90 && dx < 160 && !ai.onGround));
+  if (dx < 130 && ty < ai.y - 25 && ai.onGround && Math.random() < k.jumpP) jump(ai);
+  if (k.skill > 0.5 && dx < 110 && ty < ai.y - 90 && ai.jumps === 1 && ai.vy > 0 && Math.random() < k.jumpP) jump(ai, -1);
+  return { move, boost };
+}
+
+function carBall(car) {
+  if (car.dead > 0) return;
+  const cx = Math.max(car.x - CW / 2, Math.min(ball.x, car.x + CW / 2));
+  const cy = Math.max(car.y - CH / 2, Math.min(ball.y, car.y + CH / 2));
+  let nx = ball.x - cx, ny = ball.y - cy;
+  const d = Math.hypot(nx, ny);
+  if (d >= BR) return;
+  if (d === 0) { nx = 0; ny = -1; } else { nx /= d; ny /= d; }
+  ball.x += nx * (BR - d + 1);
+  ball.y += ny * (BR - d + 1);
+  const vn = (ball.vx - car.vx) * nx + (ball.vy - car.vy) * ny;
+  if (vn < 0) {
+    if (vn < -150 && performance.now() - lastHit > 90) { lastHit = performance.now(); sfx("hit"); }
+    const mega = car.pw && car.pw.type === "mega";
+    const k = (car.boosting ? 2.3 : 1.9) * (mega ? 1.7 : 1) * (car.power || 1) * (car.flip > 0 ? 1.15 : 1);
+    if (mega) { car.pw = null; shake = 14; }
+    ball.vx -= k * vn * nx;
+    ball.vy -= k * vn * ny;
+    if (car.boosting) shake = Math.max(shake, 5);
+    ball.vx += car.vx * 0.15;
+  }
+}
+
+function updateBall(dt) {
+  ball.vy += 900 * dt;
+  ball.vx *= 1 - 0.1 * dt;
+  ball.x += ball.vx * dt;
+  ball.y += ball.vy * dt;
+  ball.rot = (ball.rot || 0) + ball.vx * dt / BR;
+  ballTrail.push({ x: ball.x, y: ball.y });
+  if (ballTrail.length > 14) ballTrail.shift();
+
+  if (ball.y + BR > FLOOR) {
+    ball.y = FLOOR - BR;
+    ball.vy = Math.abs(ball.vy) < 60 ? 0 : -ball.vy * 0.75;
+    ball.vx *= 0.99;
+  }
+  if (ball.y - BR < 0) { ball.y = BR; ball.vy = Math.abs(ball.vy) * 0.8; }
+
+  const inGoalZone = ball.y > FLOOR - GOAL_H;
+  if (!inGoalZone) {
+    if (ball.x - BR < L) { ball.x = L + BR; ball.vx = Math.abs(ball.vx) * 0.8; }
+    if (ball.x + BR > R) { ball.x = R - BR; ball.vx = -Math.abs(ball.vx) * 0.8; }
+  } else {
+    if (ball.x < L - 5) return "orange";
+    if (ball.x > R + 5) return "blue";
+  }
+  const sp = Math.hypot(ball.vx, ball.vy);
+  if (sp > 1300) { ball.vx *= 1300 / sp; ball.vy *= 1300 / sp; }
+  return null;
+}
+
+function goal(team) {
+  scores[team]++;
+  burst(team);
+  shake = 14;
+  slowT = 0.9;
+  flash = 1;
+  sfx("goal");
+  if (team === "blue" && (mode === "career" || mode === "quick")) { matchCoins += 10; toast = "¡Gol! +10 🪙"; toastT = 1.5; }
+  updateHud();
+  if (overtime) return endMatch();
+  state = "goal";
+  stateTimer = 2;
+  msgText = team === "blue" ? "¡GOL AZUL!" : "¡GOL NARANJA!";
+}
+
+function endMatch() {
+  state = "over";
+  running = false;
+  matchActive = false;
+  const { blue, orange } = scores, win = blue > orange;
+  let title, msg, btn = "Revancha", total = 0;
+  if (mode === "versus") {
+    title = win ? "¡Gana el azul!" : "¡Gana el naranja!";
+    msg = `Resultado ${blue} - ${orange}.`;
+  } else if (mode === "quick") {
+    total = matchCoins + (win ? 20 : 5);
+    save.coins += total;
+    title = win ? "¡Victoria!" : "Derrota";
+    msg = `${blue} - ${orange}. Ganaste 🪙 ${total}.`;
+  } else {
+    total = matchCoins;
+    const parts = [`goles +${matchCoins}`];
+    if (win) {
+      save.streak++;
+      const base = 50 + level * 10, st = Math.min(save.streak - 1, 5) * 10, clean = orange === 0 ? 30 : 0;
+      total += base + st + clean;
+      parts.push(`victoria +${base}`);
+      if (st) parts.push(`racha x${save.streak} +${st}`);
+      if (clean) parts.push(`portería a cero +${clean}`);
+      level++;
+      bestLevel = Math.max(bestLevel, level);
+      try { localStorage.setItem("rocketLevel", bestLevel); } catch (e) {}
+    } else {
+      save.streak = 0;
+      total += 15;
+      parts.push("consuelo +15");
+    }
+    save.coins += total;
+    title = win ? "¡Nivel superado!" : "Derrota";
+    msg = (win ? `Ganaste ${blue} - ${orange}. Siguiente rival: ${levelCfg(level).name}.` : `Perdiste ${blue} - ${orange}. Repite el nivel ${level}.`) + ` Ganaste 🪙 ${total} (${parts.join(", ")}).`;
+    btn = win ? `Nivel ${level}` : "Reintentar";
+  }
+  persist();
+  $("coins").textContent = "🪙 " + save.coins;
+  $("overlay").querySelector("h1").textContent = title;
+  $("msg").textContent = msg;
+  $("start").textContent = btn;
+  show("overlay");
+}
+
+function update(dt) {
+  if (state === "countdown") {
+    stateTimer -= dt;
+    if (stateTimer <= 0) state = "play";
+    return;
+  }
+  if (state === "goal") {
+    stateTimer -= dt;
+    updateBall(dt);
+    if (stateTimer <= 0) kickoff();
+    return;
+  }
+
+  [player, ai].forEach((c) => {
+    if (c.dead > 0) {
+      c.dead -= dt;
+      if (c.dead <= 0) { c.dead = 0; c.x = c.spawnX; c.y = FLOOR - CH / 2; c.vx = 0; c.vy = 0; c.boost = 34; c.freeze = 0; }
+    }
+  });
+  const versus = mode === "versus";
+  const move = (keys.KeyD || (!versus && keys.ArrowRight) ? 1 : 0) - (keys.KeyA || (!versus && keys.ArrowLeft) ? 1 : 0);
+  if (!(player.dead > 0)) {
+    moveCar(player, move, keys.ShiftLeft || (!versus && keys.ShiftRight), dt);
+    holdJump(player, keys.Space || keys.KeyW || (!versus && keys.ArrowUp), dt);
+  }
+  if (!(ai.dead > 0)) {
+    const a = versus ? { move: (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0), boost: keys.ShiftRight || keys.Enter } : aiThink(dt);
+    moveCar(ai, a.move, a.boost, dt);
+    if (versus) holdJump(ai, keys.ArrowUp, dt);
+  }
+  carVsCar();
+
+  pads.forEach((p) => {
+    p.t = Math.max(0, p.t - dt);
+    [player, ai].forEach((c) => {
+      if (p.t === 0 && !(c.dead > 0) && c.onGround && c.boost < 100 && Math.abs(c.x - p.x) < (p.big ? 36 : 26)) { c.boost = Math.min(100, c.boost + (p.big ? 100 : 30)); p.t = p.big ? 6 : 3; sfx("pad"); }
+    });
+  });
+  [player, ai].forEach((c) => {
+    if (c.pw) { c.pw.t -= dt; if (c.pw.t <= 0) c.pw = null; }
+    c.freeze = Math.max(0, (c.freeze || 0) - dt);
+  });
+  orbT -= dt;
+  if (save.settings.pw && !orb && orbT <= 0) {
+    const types = Object.keys(PW);
+    orb = { type: types[(Math.random() * types.length) | 0], x: L + 100 + Math.random() * (R - L - 200), y: FLOOR - 50 - Math.random() * 130, t: 10 };
+  }
+  if (orb) {
+    orb.t -= dt;
+    for (const c of [player, ai]) {
+      if (Math.abs(c.x - orb.x) < CW / 2 + 16 && Math.abs(c.y - orb.y) < CH / 2 + 16) { givePower(c, orb.type); orb = null; orbT = 14 + Math.random() * 8; break; }
+    }
+    if (orb && orb.t <= 0) { orb = null; orbT = 12; }
+  }
+  carBall(player);
+  carBall(ai);
+  [player, ai].forEach((c) => {
+    if (c.pw && c.pw.type === "magnet") {
+      const tx = c.x + c.dir * 46, ty = c.y - 26;
+      if (Math.hypot(tx - ball.x, ty - ball.y) < 280) {
+        ball.vx += (tx - ball.x) * 9 * dt; ball.vy += (ty - ball.y) * 9 * dt;
+        ball.vx *= 1 - 2 * dt; ball.vy *= 1 - 1.2 * dt;
+      }
+    }
+  });
+  const scored = updateBall(dt);
+  if (scored) return goal(scored);
+
+  if (!overtime) {
+    timeLeft -= dt;
+    if (timeLeft <= 0) {
+      if (scores.blue === scores.orange) overtime = true;
+      else return endMatch();
+    }
+  }
+  updateHud();
+}
+
+/* ---------- Dibujo ---------- */
+const bg = document.createElement("canvas");
+bg.width = W; bg.height = H;
+let particles = [], shake = 0, ballTrail = [];
+const BODIES = [
+  "M-32 8 L-32 -1 Q-31 -5 -26 -6 L-14 -8 L-8 -14 Q-6 -16 -2 -16 L10 -16 Q14 -16 17 -12 L22 -8 L30 -6 Q33 -5 33 -1 L33 8 Z",
+  "M-33 8 L-33 -2 Q-33 -6 -28 -6 L-18 -7 L-12 -14 L8 -14 L14 -8 L30 -6 Q34 -5 34 -1 L34 8 Z",
+  "M-30 8 L-30 -2 Q-30 -6 -25 -7 L-16 -9 L-11 -15 Q-9 -16 -5 -16 L8 -16 Q12 -16 14 -12 L18 -8 L28 -6 Q31 -5 31 -1 L31 8 Z",
+].map((d) => new Path2D(d));
+const GLASSES = [
+  "M-7 -8 L-4 -13.5 L9 -13.5 L15 -8 Z",
+  "M-10 -8 L-7 -12.5 L6 -12.5 L11 -8 Z",
+  "M-9 -9 L-6 -14 L8 -14 L12 -9 Z",
+].map((d) => new Path2D(d));
+
+function buildBg(T) {
+  const c = bg.getContext("2d");
+  let g = c.createLinearGradient(0, 0, 0, FLOOR);
+  g.addColorStop(0, T.sky[0]); g.addColorStop(0.55, T.sky[1]); g.addColorStop(1, T.sky[2]);
+  c.fillStyle = g; c.fillRect(0, 0, W, FLOOR);
+  // gradas con público
+  const cols = ["#2f7bff", "#ff7a2f", "#ffffff", "#ffd84d", "#8aa4ff", "#ff5d5d"];
+  for (let row = 0, y = 80; y < FLOOR - 40; row++, y += 11)
+    for (let x = (row % 2) * 5; x < W; x += 10) {
+      c.globalAlpha = 0.3 + Math.random() * 0.4;
+      c.fillStyle = cols[(Math.random() * cols.length) | 0];
+      c.beginPath(); c.arc(x + Math.random() * 3, y + Math.random() * 3, 2.2, 0, 7); c.fill();
+    }
+  c.globalAlpha = 1;
+  g = c.createLinearGradient(0, 0, 0, FLOOR);
+  g.addColorStop(0, "rgba(4,6,16,.95)"); g.addColorStop(0.4, "rgba(4,6,16,.5)"); g.addColorStop(1, "rgba(4,6,16,0)");
+  c.fillStyle = g; c.fillRect(0, 0, W, FLOOR);
+  // pantalla gigante con ANGUEL
+  const sx = W / 2 - 210, sy = 82;
+  c.fillStyle = "rgba(4,7,20,.82)"; c.strokeStyle = "#2f7bff"; c.lineWidth = 3;
+  c.beginPath(); c.rect(sx, sy, 420, 110); c.fill(); c.stroke();
+  c.strokeStyle = "#ff7a2f"; c.lineWidth = 2; c.strokeRect(sx + 7, sy + 7, 406, 96);
+  c.textAlign = "center"; c.textBaseline = "middle";
+  c.font = "900 80px 'Trebuchet MS', Impact, sans-serif";
+  c.shadowColor = "#ff7a2f"; c.shadowBlur = 40; c.fillStyle = "#ffb27a"; c.fillText("ANGUEL", W / 2, sy + 58);
+  c.shadowColor = "#2f7bff"; c.shadowBlur = 20; c.fillStyle = "#fff"; c.fillText("ANGUEL", W / 2, sy + 58);
+  c.shadowBlur = 0;
+  // césped
+  for (let x = 0, i = 0; x < W; x += 60, i++) { c.fillStyle = i % 2 ? T.grass[0] : T.grass[1]; c.fillRect(x, FLOOR, 60, H - FLOOR); }
+  c.fillStyle = "rgba(255,255,255,.5)"; c.fillRect(0, FLOOR, W, 2); c.fillRect(W / 2 - 1, FLOOR, 2, H - FLOOR);
+}
+
+function drawBoards() {
+  const t = (performance.now() / 25) % 120;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(L, FLOOR - 30, R - L, 24); ctx.clip();
+  ctx.fillStyle = "#04060f"; ctx.fillRect(L, FLOOR - 30, R - L, 24);
+  ctx.font = "bold 16px 'Trebuchet MS', sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  for (let i = -1; i < 9; i++) { ctx.fillStyle = i % 2 ? "#ff7a2f" : "#2f7bff"; ctx.fillText("ANGUEL", L + i * 120 + t, FLOOR - 18); }
+  ctx.restore();
+}
+
+function drawPads() {
+  pads.forEach((p) => {
+    const on = p.t === 0, w = p.big ? 30 : 18;
+    ctx.save();
+    ctx.translate(p.x, FLOOR + 8);
+    if (on) { ctx.shadowColor = "#ff7a2f"; ctx.shadowBlur = 14 + 6 * Math.sin(performance.now() / 200); }
+    ctx.fillStyle = on ? (p.big ? "#ffb14a" : "#ffd98a") : "#3a3f55";
+    ctx.beginPath(); ctx.ellipse(0, 0, w, p.big ? 6 : 4, 0, 0, 7); ctx.fill();
+    ctx.shadowBlur = 0;
+    if (p.big) {
+      ctx.fillStyle = on ? "#fff" : "#6b7189";
+      ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("TURBO", 0, 0);
+    }
+    ctx.restore();
+  });
+}
+
+function drawGoal(x, side, color) {
+  const top = FLOOR - GOAL_H, gx = side < 0 ? x - 46 : x;
+  ctx.fillStyle = color + "33"; ctx.fillRect(gx, top, 46, GOAL_H);
+  ctx.strokeStyle = color + "88"; ctx.lineWidth = 1;
+  for (let i = 0; i < 46; i += 8) { ctx.beginPath(); ctx.moveTo(gx + i, top); ctx.lineTo(gx + i, FLOOR); ctx.stroke(); }
+  for (let j = 0; j < GOAL_H; j += 12) { ctx.beginPath(); ctx.moveTo(gx, top + j); ctx.lineTo(gx + 46, top + j); ctx.stroke(); }
+  ctx.fillStyle = "#e8ecff"; ctx.fillRect(x - 3, top - 4, 6, GOAL_H + 4);
+  ctx.fillStyle = color; ctx.fillRect(gx, top - 5, 46, 5);
+}
+
+function poly(cx, cy, r, n, rot) {
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) { const a = rot + i * 2 * Math.PI / n; ctx[i ? "lineTo" : "moveTo"](cx + Math.cos(a) * r, cy + Math.sin(a) * r); }
+  ctx.closePath();
+}
+
+function drawCar(car) {
+  if (car.dead > 0) return;
+  const sc = Math.max(0.4, 1 - (FLOOR - (car.y + CH / 2)) / 400);
+  ctx.fillStyle = "rgba(0,0,0,.4)";
+  ctx.beginPath(); ctx.ellipse(car.x, FLOOR + 6, 34 * sc, 5 * sc, 0, 0, 7); ctx.fill();
+  const bi = car.model ? car.model.body : 0;
+  ctx.save();
+  ctx.translate(car.x, car.y);
+  const tilt = car.onGround ? 0 : Math.max(-0.35, Math.min(0.35, car.vy / 1400));
+  ctx.rotate(tilt * car.dir + (car.flip > 0 ? car.flipDir * (1 - car.flip / 0.45) * Math.PI * 2 : 0));
+  ctx.scale(car.dir, 1);
+  ctx.fillStyle = car.color + "55";
+  ctx.beginPath(); ctx.ellipse(0, 13, 30, 4, 0, 0, 7); ctx.fill();
+  if (car.boosting) {
+    const f = 22 + Math.random() * 20, fg = ctx.createLinearGradient(-32, 0, -32 - f, 0);
+    fg.addColorStop(0, "#fff"); fg.addColorStop(0.3, "#ffd25a"); fg.addColorStop(1, "rgba(255,90,20,0)");
+    ctx.fillStyle = fg; ctx.beginPath(); ctx.moveTo(-31, -1); ctx.lineTo(-32 - f, 4); ctx.lineTo(-31, 9); ctx.fill();
+  }
+  ctx.fillStyle = "#15192b"; ctx.fillRect(-33, -12, 9, 3); ctx.fillRect(-30, -9, 2, 5);
+  ctx.fillStyle = car.color; ctx.fill(BODIES[bi]);
+  const sh = ctx.createLinearGradient(0, -16, 0, 8);
+  sh.addColorStop(0, "rgba(255,255,255,.4)"); sh.addColorStop(0.5, "rgba(255,255,255,0)"); sh.addColorStop(1, "rgba(0,0,0,.4)");
+  ctx.fillStyle = sh; ctx.fill(BODIES[bi]);
+  ctx.save(); ctx.clip(BODIES[bi]); ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.fillRect(-34, 0, 70, 2); ctx.restore();
+  const gl = ctx.createLinearGradient(0, -14, 0, -8);
+  gl.addColorStop(0, "#9fc8ff"); gl.addColorStop(1, "#0d1b33");
+  ctx.fillStyle = gl; ctx.fill(GLASSES[bi]);
+  ctx.shadowColor = "#fff6c2"; ctx.shadowBlur = 12; ctx.fillStyle = "#fff6c2"; ctx.fillRect(30, -4, 3, 3);
+  ctx.shadowBlur = 0; ctx.fillStyle = "#ff3b3b"; ctx.fillRect(-33, -4, 2, 3);
+  [-20, 21].forEach((wx) => {
+    ctx.fillStyle = "#080a14"; ctx.beginPath(); ctx.arc(wx, 6, 9.5, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = "#0c0d14"; ctx.beginPath(); ctx.arc(wx, 6, 8, 0, 7); ctx.fill();
+    ctx.fillStyle = "#c9d1e8"; ctx.beginPath(); ctx.arc(wx, 6, 5, 0, 7); ctx.fill();
+    ctx.strokeStyle = "#59607a"; ctx.lineWidth = 1.5;
+    for (let i = 0; i < 5; i++) {
+      const a = (car.wheel || 0) * car.dir + i * 2 * Math.PI / 5;
+      ctx.beginPath(); ctx.moveTo(wx, 6); ctx.lineTo(wx + Math.cos(a) * 5, 6 + Math.sin(a) * 5); ctx.stroke();
+    }
+  });
+  if (car.pw) {
+    ctx.strokeStyle = PW[car.pw.type].color; ctx.lineWidth = 2; ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.ellipse(0, -2, 42, 24, 0, 0, 7); ctx.stroke(); ctx.shadowBlur = 0;
+  }
+  if ((car.freeze || 0) > 0) {
+    ctx.fillStyle = "rgba(150,220,255,.55)"; ctx.fill(BODIES[bi]);
+    ctx.strokeStyle = "#dff6ff"; ctx.lineWidth = 2; ctx.stroke(BODIES[bi]);
+  }
+  ctx.restore();
+}
+
+function addTrail(car) {
+  particles.push({ x: car.x - car.dir * 20, y: car.y + 10, vx: -car.dir * 40, vy: -20 - Math.random() * 30, life: 0.5, max: 0.5, size: 2 + Math.random() * 2, color: car.model.trail, g: 0 });
+}
+
+function drawOrb() {
+  if (!orb) return;
+  if (orb.t < 3 && Math.floor(orb.t * 6) % 2) return;
+  const col = PW[orb.type].color;
+  ctx.save();
+  ctx.translate(orb.x, orb.y + Math.sin(performance.now() / 300) * 6);
+  ctx.shadowColor = col; ctx.shadowBlur = 22;
+  ctx.fillStyle = col + "55"; ctx.strokeStyle = col; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(0, 0, 17, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.font = "18px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(PW[orb.type].icon, 0, 1);
+  ctx.restore();
+}
+
+function drawBall() {
+  if (Math.hypot(ball.vx, ball.vy) > 380) ballTrail.forEach((p, i) => {
+    ctx.globalAlpha = (i / ballTrail.length) * 0.3; ctx.fillStyle = "#ffb27a";
+    ctx.beginPath(); ctx.arc(p.x, p.y, BR * (0.4 + 0.6 * i / ballTrail.length), 0, 7); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  const sc = Math.max(0.4, 1 - (FLOOR - ball.y) / 420), sp = Math.hypot(ball.vx, ball.vy);
+  ctx.fillStyle = "rgba(0,0,0,.35)";
+  ctx.beginPath(); ctx.ellipse(ball.x, FLOOR + 6, BR * sc, 5 * sc, 0, 0, 7); ctx.fill();
+  ctx.save(); ctx.translate(ball.x, ball.y);
+  if (sp > 450) { ctx.shadowColor = "#ffb27a"; ctx.shadowBlur = Math.min(30, (sp - 450) / 12); }
+  const g = ctx.createRadialGradient(-7, -8, 2, 0, 0, BR);
+  g.addColorStop(0, "#fff"); g.addColorStop(1, "#b8bfd6");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, BR, 0, 7); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.save(); ctx.beginPath(); ctx.arc(0, 0, BR, 0, 7); ctx.clip(); ctx.rotate(ball.rot || 0);
+  ctx.fillStyle = "#1a1f33"; ctx.strokeStyle = "#1a1f33"; ctx.lineWidth = 1.5;
+  poly(0, 0, 8, 5, -Math.PI / 2); ctx.fill();
+  for (let i = 0; i < 5; i++) {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / 5;
+    ctx.beginPath(); ctx.moveTo(Math.cos(a) * 8, Math.sin(a) * 8); ctx.lineTo(Math.cos(a) * 15, Math.sin(a) * 15); ctx.stroke();
+    poly(Math.cos(a) * 22, Math.sin(a) * 22, 8, 5, a + Math.PI); ctx.fill();
+  }
+  ctx.restore();
+  ctx.fillStyle = "rgba(255,255,255,.55)";
+  ctx.beginPath(); ctx.ellipse(-8, -9, 5, 3, -0.7, 0, 7); ctx.fill();
+  ctx.restore();
+}
+
+function addFlame(car) {
+  for (let i = 0; i < 2; i++) particles.push({
+    x: car.x - car.dir * (CW / 2 + 4), y: car.y + 3 + (Math.random() - 0.5) * 6,
+    vx: -car.dir * (120 + Math.random() * 160) + car.vx * 0.3, vy: (Math.random() - 0.5) * 70,
+    life: 0.35, max: 0.35, size: 2 + Math.random() * 3, color: Math.random() < 0.5 ? "#ffb14a" : "#ff5a1f", g: 0,
+  });
+}
+
+function burst(team) {
+  const x = team === "blue" ? R + 10 : L - 10, cols = ["#2f7bff", "#ff7a2f", "#fff", "#ffd84d"];
+  for (let i = 0; i < 140; i++) particles.push({
+    x, y: FLOOR - GOAL_H / 2, vx: (Math.random() - 0.5) * 700 + (team === "blue" ? -200 : 200), vy: -Math.random() * 600,
+    life: 1.6, max: 1.6, size: 3 + Math.random() * 4, color: cols[(Math.random() * 4) | 0], g: 900, sq: true,
+  });
+}
+
+function stepFx(dt) {
+  particles.forEach((p) => { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += p.g * dt; });
+  particles = particles.filter((p) => p.life > 0);
+  shake = Math.max(0, shake - 40 * dt);
+  flash = Math.max(0, flash - 1.5 * dt);
+  toastT = Math.max(0, toastT - dt);
+}
+
+function draw() {
+  ctx.save();
+  if (shake > 0) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+  ctx.drawImage(bg, 0, 0);
+  drawBoards();
+  drawPads();
+  drawOrb();
+  drawGoal(L, -1, "#2f7bff");
+  drawGoal(R, 1, "#ff7a2f");
+  drawCar(ai);
+  drawCar(player);
+  drawBall();
+  particles.forEach((p) => {
+    ctx.globalAlpha = Math.max(0, p.life / p.max);
+    ctx.fillStyle = p.color;
+    if (p.sq) ctx.fillRect(p.x, p.y, p.size, p.size);
+    else { ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill(); }
+  });
+  ctx.globalAlpha = 1;
+  if (state === "countdown" || state === "goal") {
+    ctx.font = "bold 72px 'Trebuchet MS', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.lineWidth = 6; ctx.strokeStyle = "rgba(0,0,0,.6)"; ctx.fillStyle = "#fff";
+    const txt = state === "goal" ? msgText : Math.ceil(stateTimer);
+    ctx.strokeText(txt, W / 2, 290); ctx.fillText(txt, W / 2, 290);
+  }
+  if (flash > 0) { ctx.fillStyle = `rgba(255,230,180,${flash * 0.35})`; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+}
+
+function loop(t) {
+  if (!running) return;
+  const raw = Math.min(0.033, (t - last) / 1000);
+  last = t;
+  const dt = slowT > 0 ? raw * 0.3 : raw;
+  slowT = Math.max(0, slowT - raw);
+  update(dt);
+  stepFx(raw);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+let gSel = save.car, gRaf = 0;
+
+function renderGarage() {
+  $("coinsG").textContent = "🪙 " + save.coins;
+  $("cards").innerHTML = "";
+  CARS.forEach((c) => {
+    const owned = save.owned.includes(c.id), b = document.createElement("button");
+    b.className = "card" + (c.id === gSel ? " sel" : "") + (owned ? "" : " locked");
+    b.textContent = c.name + (owned ? (save.car === c.id ? " ✓" : "") : " 🪙" + c.price);
+    b.onclick = () => { gSel = c.id; renderGarage(); };
+    $("cards").appendChild(b);
+  });
+  const c = CARS.find((x) => x.id === gSel), owned = save.owned.includes(c.id);
+  $("carName").textContent = c.name;
+  const bar = (n, v) => `<div class="stat"><span>${n}</span><div><i style="width:${Math.max(5, Math.min(100, (v - 0.8) / 0.5 * 100))}%"></i></div></div>`;
+  $("stats").innerHTML = bar("Velocidad", c.speed) + bar("Salto", c.jump) + bar("Turbo", c.accel) + bar("Potencia", c.power);
+  const pick = $("pick");
+  pick.textContent = owned ? (save.car === c.id ? "Equipado" : "Elegir") : save.coins >= c.price ? `Comprar 🪙${c.price}` : `Faltan 🪙${c.price - save.coins}`;
+}
+
+function gLoop() {
+  const c = CARS.find((x) => x.id === gSel), pc = $("preview").getContext("2d"), main = ctx, t = performance.now();
+  ctx = pc;
+  pc.clearRect(0, 0, 260, 130);
+  pc.save();
+  pc.translate(130, 72); pc.scale(2.1, 2.1); pc.translate(-130, -(FLOOR - 14 + Math.sin(t / 400) * 1.5));
+  drawCar({ x: 130, y: FLOOR - 14, vx: 160, vy: 0, dir: 1, color: c.color, boost: 100, onGround: true, boosting: false, model: c, wheel: t / 50 });
+  pc.restore();
+  ctx = main;
+  gRaf = requestAnimationFrame(gLoop);
+}
+
+function openGarage() {
+  garageFrom = $("overlay").classList.contains("hidden") ? "menu" : "overlay";
+  gSel = save.car; renderGarage(); show("garage"); gLoop();
+}
+function closeGarage() {
+  cancelAnimationFrame(gRaf);
+  $("coins").textContent = "🪙 " + save.coins;
+  if (garageFrom === "menu") { newMatch(); draw(); }
+  show(garageFrom);
+}
+function pickCar() {
+  const c = CARS.find((x) => x.id === gSel);
+  if (!save.owned.includes(c.id)) {
+    if (save.coins < c.price) return;
+    save.coins -= c.price;
+    save.owned.push(c.id);
+  }
+  save.car = c.id;
+  persist();
+  renderGarage();
+}
+
+const SCREENS = ["menu", "quick", "settings", "help", "overlay", "pause", "garage"];
+function show(id) {
+  SCREENS.forEach((n) => $(n).classList.add("hidden"));
+  if (id) $(id).classList.remove("hidden");
+}
+
+function startMatch(m, q) {
+  mode = m;
+  if (q) quickLvl = q;
+  show(null);
+  newMatch();
+  matchActive = true;
+  running = true;
+  last = performance.now();
+  requestAnimationFrame(loop);
+}
+function start() { startMatch(mode); }
+
+function goMenu() {
+  running = false;
+  matchActive = false;
+  cancelAnimationFrame(gRaf);
+  mode = "career";
+  newMatch();
+  draw();
+  $("menuInfo").textContent = `Nivel ${level} · 🪙 ${save.coins}`;
+  show("menu");
+}
+
+function togglePause() {
+  if (!matchActive) return;
+  if (running) { running = false; show("pause"); }
+  else { show(null); running = true; last = performance.now(); requestAnimationFrame(loop); }
+}
+
+function renderSettings() {
+  $("sPw").textContent = "Power-ups: " + (save.settings.pw ? "Sí" : "No");
+  $("sTime").textContent = "Duración: " + save.settings.time + " s";
+  $("sSound").textContent = "Sonido: " + (save.settings.sound ? "Sí" : "No");
+}
+
+window.addEventListener("keydown", (e) => {
+  if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault();
+  if ((e.code === "Escape" || e.code === "KeyP") && !e.repeat) togglePause();
+  if (!keys[e.code] && running && state === "play") {
+    const versus = mode === "versus";
+    const dir = (keys.KeyD || (!versus && keys.ArrowRight) ? 1 : 0) - (keys.KeyA || (!versus && keys.ArrowLeft) ? 1 : 0);
+    if (e.code === "Space" || e.code === "KeyW" || (!versus && e.code === "ArrowUp")) jump(player, dir);
+    if (versus && e.code === "ArrowUp") jump(ai, (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0));
+  }
+  keys[e.code] = true;
+});
+window.addEventListener("keyup", (e) => { keys[e.code] = false; });
+$("start").addEventListener("click", start);
+
+level = bestLevel;
+$("garageBtn").addEventListener("click", openGarage);
+$("closeG").addEventListener("click", closeGarage);
+$("pick").addEventListener("click", pickCar);
+$("toMenu").addEventListener("click", goMenu);
+$("pMenu").addEventListener("click", goMenu);
+$("pResume").addEventListener("click", togglePause);
+$("mCareer").addEventListener("click", () => startMatch("career"));
+$("mQuick").addEventListener("click", () => show("quick"));
+$("mVersus").addEventListener("click", () => startMatch("versus"));
+$("mPractice").addEventListener("click", () => startMatch("practice"));
+$("mGarage").addEventListener("click", openGarage);
+$("mSettings").addEventListener("click", () => { renderSettings(); show("settings"); });
+$("mHelp").addEventListener("click", () => show("help"));
+["qBack", "sBack", "hBack"].forEach((id) => $(id).addEventListener("click", () => show("menu")));
+["q1", "q3", "q5", "q8"].forEach((id) => $(id).addEventListener("click", () => startMatch("quick", Number(id.slice(1)))));
+$("sPw").addEventListener("click", () => { save.settings.pw = !save.settings.pw; persist(); renderSettings(); });
+$("sTime").addEventListener("click", () => { const t = [60, 90, 120, 180]; save.settings.time = t[(t.indexOf(save.settings.time) + 1) % t.length]; persist(); renderSettings(); });
+$("sSound").addEventListener("click", () => { save.settings.sound = !save.settings.sound; persist(); renderSettings(); });
+goMenu();
+</script>
+</body>
+</html>
