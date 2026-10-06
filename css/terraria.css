@@ -1,23 +1,173 @@
-h1{
-    color: rgb(2, 2, 2);
-    text-decoration: underline;
-    padding: 20px;
+/* Fondo general */
+body{
+    margin: 0;
+    padding: 0;
+    color: white;
+
+    background-image: url("https://i.pinimg.com/736x/18/78/32/18783272885b251b381520606266b39f.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
+
+
+/* Contenedor principal */
 div{
+    width: 85%;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 25px;
+
+    background-color: rgba(0, 0, 0, 0.65);
+
+    border: 4px solid #8b5a2b;
+    border-radius: 8px;
+
+    box-shadow:
+        0 0 0 4px #5f3818,
+        0 0 20px rgba(0,0,0,0.8);
+}
+
+/* Título */
+h1{
+    text-align: center;
+    color: #7cff7c;
+    font-size: 2.5rem;
+    text-shadow:
+        3px 3px 0 #000,
+        0 0 10px limegreen;
+    margin-bottom: 30px;
+}
+
+/* Lista */
+ul{
+    list-style-type: square;
+    padding-left: 30px;
+}
+
+/* Texto */
 li{
-        color: rgb(97, 49, 9);
-        font-family:'Times New Roman', Times, serif
+    line-height: 1.8;
+    font-size: 18px;
+    margin-bottom: 15px;
 }
 
+/* Imágenes */
 img{
-    margin-left: 200px;
-    height: 250px;
+    display: block;
+    margin: 20px auto;
+
     width: 250px;
+    max-width: 90%;
+
+    image-rendering: pixelated;
+
+    border: 4px solid #22ff00;
+    background-color: rgba(255,255,255,0.1);
+
+    box-shadow: 0 0 15px rgba(255,215,0,0.6);
+
+    transition: 0.3s;
 }
 
+img:hover{
+    transform: scale(1.08);
+    box-shadow: 0 0 25px gold;
+}
+
+/* Texto de desarrollo */
 p{
-    color: black;
-    font-size:  20px;
-    text-decoration: underline;
+    color: #ffd700;
+    font-size: 22px;
+    font-weight: bold;
 }
+
+/* Enlaces */
+a{
+    color: #7ce7ff;
+    text-decoration: none;
 }
+
+a:hover{
+    color: #ffffff;
+    text-shadow: 0 0 8px cyan;
+}
+
+/* Información inferior */
+body > p{
+    margin-right: 30px;
+    font-size: 18px;
+    color: #ffffff;
+}
+
+/* Scrollbar estilo juego */
+::-webkit-scrollbar{
+    width: 12px;
+}
+
+::-webkit-scrollbar-track{
+    background: #2f4f2f;
+}
+
+::-webkit-scrollbar-thumb{
+    background: #7c5a34;
+    border: 2px solid #2c4b13;
+}
+
+.info-footer{
+    width: fit-content;
+    margin: 40px auto 20px auto;
+    padding: 12px 20px;
+
+    background-color: rgba(0, 0, 0, 0.75);
+
+    border: 3px solid #17e400;
+    border-radius: 8px;
+
+    color: white;
+    font-size: 18px;
+    text-align: center;
+
+    box-shadow:
+    0 0 10px rgba(0,0,0,0.8),
+    0 0 15px rgba(124,255,124,0.4);
+}
+
+.info-footer a{
+    margin-left: 10px;
+    color: #7cff7c;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.info-footer a:hover{
+    color: #ffffff;
+    text-shadow: 0 0 10px #7cff7c;
+}
+
+.caja{
+    width: 85%;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 25px;
+
+    background-color: rgba(0, 0, 0, 0.65);
+
+    border: 4px solid #8b5a2b;
+    border-radius: 8px;
+
+    box-shadow:
+        0 0 0 4px #5f3818,
+        0 0 20px rgba(0,0,0,0.8);
+}
+
+.titulo-seccion{
+    color: #ffd700;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 2px 2px 0 #000;
+    margin-bottom: 20px;
+}
+
