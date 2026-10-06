@@ -1,0 +1,42 @@
+body {
+    font-family: sans-serif;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    padding: 20px;
+}
+
+.principal-header, .summary {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.cars-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.car-card {
+    flex: 1 1 200px;
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    border-top: 3px solid #ff4500;
+}
+
+.game-images {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.game-images img {
+    width: 280px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+}
