@@ -12,12 +12,24 @@ header {
 }
 
 h1 {
-    color: #c00;
+    color: #fff;
     font-family: Georgia, "Times New Roman", serif;
     font-size: 48px;
     text-transform: uppercase;
     letter-spacing: 4px;
     text-shadow: 0 0 15px rgba(204, 0, 0, 0.6);
+}
+
+h1 span {
+    color: #c00;
+}
+
+h1 .remake {
+    display: block;
+    color: #fff;
+    font-size: 35px;
+    letter-spacing: 8px;
+    margin-top: 5px;
 }
 
 main {
@@ -81,10 +93,86 @@ blockquote {
     color: #ccc;
 }
 
+.galeria {
+    margin-top: 40px;
+}
+
+.galeria h2 {
+    color: #c00;
+    font-family: Georgia, "Times New Roman", serif;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.capturas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.capturas img {
+    margin: 0;
+    width: 100%;
+    height: auto;
+}
+
 footer {
     text-align: center;
     padding: 20px;
     margin-top: 40px;
     border-top: 1px solid #c00;
     color: #888;
+}
+
+/* Datos curiosos */
+.curiosidades {
+    margin-top: 40px;
+}
+
+.curiosidades h2 {
+    color: #c00;
+    font-family: Georgia, "Times New Roman", serif;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.curiosidades li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/* Valoración */
+.valoracion {
+    text-align: center;
+    margin: 0 0 30px;
+}
+
+.valoracion .nota {
+    display: block;
+    color: #c00;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 64px;
+    font-weight: bold;
+    text-shadow: 0 0 15px rgba(204, 0, 0, 0.6);
+}
+
+.valoracion .etiqueta {
+    display: block;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 14px;
+}
+
+.capturas figure {
+    margin: 0;
+}
+
+.capturas figcaption {
+    margin-top: 8px;
+    text-align: center;
+    color: #ccc;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
