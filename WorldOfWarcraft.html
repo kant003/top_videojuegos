@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World of Warcraft</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/WorldOfWarcraft.css">
+</head>
+<body>
+    <header>
+        <img src="images/wow_logo.jpg" alt="World of Warcraft">
+        <nav>
+            <a href="#facciones">Facciones</a>
+            <a href="#mapa">Mapa</a>
+        </nav>
+    </header>
+
+    <section class="portada">
+        <video autoplay muted loop class="video-fondo" id="videoWow">
+            <source src="video/wow_video.mp4" type="video/mp4">
+        </video>
+        <div class="contenido-portada">
+            <h1>WORLD OF WARCRAFT</h1>
+            <p>
+                Elige tu facción y comienza tu aventura en Azeroth.
+            </p>
+        </div>
+    </section>
+
+    <section id="facciones">
+        <h2>Elige tu facción</h2>
+        <div class="facciones">
+            <div class="faccion">
+                <img src="images/wow_horda.png" alt="Horda">
+                <h3>Horda</h3>
+                <p>
+                    Lucha junto a la Horda y defiende a tus aliados.
+                </p>
+                <button>Elegir Horda</button>
+            </div>
+            <div class="faccion">
+                <img src="images/wow_alianza.png" alt="Alianza">
+                <h3>Alianza</h3>
+                <p>
+                    Únete a la Alianza y lucha por Azeroth.
+                </p>
+                <button>Elegir Alianza</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="mapa" class="mapa">
+        <h2>Mapa de Azeroth</h2>
+        <p>
+            Explora las diferentes regiones del mundo.
+        </p>
+        <img src="images/wow_mapa.jpg" alt="Mapa de Azeroth">
+    </section>
+
+    <footer>
+        <p>
+            Página realizada por Agustín 2ºDAM.
+        </p>
+    </footer>
+    <script src="./js/WorldOfWarcraft.js"></script>
+</body>
+</html>
