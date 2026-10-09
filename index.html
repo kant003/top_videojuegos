@@ -1,15 +1,118 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rocket League</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Top de los mejores videojuegos de la historia</h1>
-    <ul>
-        <li></li>
-        <li></li>
-    </ul>
+
+  <header class="cabecera">
+    <h1 class="logo">ROCKET LEAGUE</h1>
+    <nav>
+      <a href="#que-es">¿Qué es?</a>
+      <a href="#modos">Modos</a>
+      <a href="#coches">Coches</a>
+      <a href="#controles">Controles</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <img src="img/inicio.png" alt="Coches de Rocket League jugando en el estadio">
+    <div class="hero-texto">
+      <h2>Fútbol con coches</h2>
+      <p>Coches propulsados por cohetes, una pelota gigante y goles imposibles.</p>
+      <a class="boton" href="#que-es">Descubrir</a>
+    </div>
+  </section>
+
+  <main>
+    <section id="que-es" class="bloque">
+      <h2>¿Qué es Rocket League?</h2>
+      <div class="dos-columnas">
+        <div>
+          <p>Rocket League es un videojuego deportivo que mezcla fútbol y coches. Dos equipos compiten para meter una pelota enorme en la portería rival.</p>
+          <p>Los coches pueden saltar, volar con el turbo y hacer voltereteos en el aire. Lo desarrolló Psyonix en 2015 y se ha convertido en un clásico de los esports.</p>
+          <ul class="datos">
+            <li><strong>Género:</strong> Deportes / Carreras</li>
+            <li><strong>Desarrollador:</strong> Psyonix</li>
+            <li><strong>Jugadores:</strong> de 1 a 4 por equipo</li>
+          </ul>
+        </div>
+        <figure>
+          <img src="img/pelota.png" alt="Pelota de Rocket League">
+          <figcaption>La pelota, protagonista de cada partido</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="modos" class="bloque oscuro">
+      <h2>Modos de juego</h2>
+      <div class="tarjetas">
+        <article class="tarjeta">
+          <h3>Partido rápido</h3>
+          <p>Entra en una partida casual con jugadores de todo el mundo.</p>
+        </article>
+        <article class="tarjeta">
+          <h3>Competitivo</h3>
+          <p>Sube de rango y demuestra tu nivel en partidas clasificatorias.</p>
+        </article>
+        <article class="tarjeta">
+          <h3>Torneos</h3>
+          <p>Compite en eliminatorias contra otros equipos y gana premios.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="coches" class="bloque">
+      <h2>Coches</h2>
+      <div class="galeria">
+        <figure>
+          <img src="img/coche-azul.png" alt="Coche azul Octane">
+          <figcaption>Octane (equipo azul)</figcaption>
+        </figure>
+        <figure>
+          <img src="img/coche-morado.png" alt="Coche morado">
+          <figcaption>Coche morado con halo</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="controles" class="bloque oscuro">
+      <h2>Controles básicos</h2>
+      <table>
+        <thead>
+          <tr><th>Acción</th><th>Teclado</th><th>Mando</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Acelerar</td><td>W</td><td>RT</td></tr>
+          <tr><td>Saltar</td><td>Espacio</td><td>A / X</td></tr>
+          <tr><td>Turbo</td><td>Clic derecho</td><td>B / O</td></tr>
+          <tr><td>Cámara de balón</td><td>Clic izquierdo</td><td>Y / Triángulo</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="contacto" class="bloque">
+      <h2>Contacto</h2>
+      <form action="#" method="post">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Tu nombre">
+        <label for="correo">Correo</label>
+        <input type="email" id="correo" name="correo" placeholder="tucorreo@ejemplo.com">
+        <label for="mensaje">Mensaje</label>
+        <textarea id="mensaje" name="mensaje" rows="4" placeholder="Escribe aquí..."></textarea>
+        <button class="boton" type="submit">Enviar</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <p>Página de ejemplo sobre Rocket League · Acceso a Datos 2026/27</p>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
