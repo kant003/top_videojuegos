@@ -1,0 +1,308 @@
+@import url("https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@600;700&display=swap");
+
+:root {
+  --bg-gryffindor: #12080a;
+  --surface-paper: #1c0d10;
+  --text-ink: #f0e6d2;
+  --text-muted: #b89d9e;
+  --gold-magical: #d4af37;
+  --gold-bright: #ffd700;
+  --gryffindor-red: #74151d;
+  --gryffindor-red-light: #9c1c27;
+  --border-magic: rgba(212, 175, 55, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(116, 21, 29, 0.35), transparent 40rem),
+    var(--bg-gryffindor);
+  color: var(--text-ink);
+  font-family: "IM Fell English", Georgia, serif;
+  line-height: 1.85;
+  font-size: 1.12rem;
+}
+
+.site-header {
+  height: 75px;
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--gryffindor-red);
+  border-bottom: 3px solid var(--gold-bright);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.site-logo {
+  color: var(--gold-bright);
+  font-family: "Cinzel", serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-decoration: none;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.site-header nav {
+  display: flex;
+  gap: 30px;
+}
+
+.site-header nav a {
+  color: #f3e5cb;
+  font-family: "Cinzel", serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-header nav a:hover {
+  color: var(--gold-bright);
+}
+
+.hero {
+  position: relative;
+  height: min(72vh, 700px);
+  min-height: 480px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  isolation: isolate;
+  border-bottom: 4px solid var(--gryffindor-red);
+}
+
+.hero > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: -3;
+  filter: sepia(30%) contrast(1.15) hue-rotate(-10deg);
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(
+      to top,
+      rgba(18, 8, 10, 0.96) 0%,
+      rgba(116, 21, 29, 0.5) 35%,
+      rgba(18, 8, 10, 0.2) 80%
+    ),
+    radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.2), transparent 50%);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg, var(--gryffindor-red-light), var(--gold-bright), var(--gryffindor-red-light));
+}
+
+.hero-content {
+  width: min(1000px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 80px 0 70px;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 4px 12px;
+  background: rgba(116, 21, 29, 0.6);
+  border: 1px solid var(--gold-bright);
+  color: var(--gold-bright);
+  font-family: "Cinzel", serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  border-radius: 2px;
+}
+
+h1 {
+  max-width: 900px;
+  margin: 0;
+  color: #fff9e6;
+  font-family: "Cinzel", serif;
+  font-size: clamp(2.8rem, 6vw, 5.2rem);
+  font-weight: 700;
+  line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
+}
+
+.hero-content p {
+  max-width: 650px;
+  margin: 20px 0 0;
+  color: #ebdcb5;
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  font-style: italic;
+}
+
+.post {
+  width: min(850px, calc(100% - 40px));
+  margin: -40px auto 90px;
+  position: relative;
+  z-index: 10;
+}
+
+article {
+  background: var(--surface-paper);
+  border: 2px solid var(--border-magic);
+  padding: 60px 70px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5),
+              inset 0 0 80px rgba(116, 21, 29, 0.15);
+  border-radius: 4px;
+  position: relative;
+}
+
+article::before, article::after {
+  content: "✦";
+  position: absolute;
+  color: var(--gold-bright);
+  font-size: 1.2rem;
+}
+article::before { top: 20px; left: 25px; }
+article::after { top: 20px; right: 25px; }
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 40px;
+  color: var(--gold-bright);
+  font-family: "Cinzel", serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  border-bottom: 1px solid var(--border-magic);
+  padding-bottom: 20px;
+}
+
+p {
+  margin: 0 0 28px;
+  color: var(--text-ink);
+}
+
+.lead {
+  color: var(--gold-bright);
+  font-family: "Cinzel", serif;
+  font-size: 1.45rem;
+  line-height: 1.6;
+  margin-bottom: 38px;
+  font-weight: 700;
+  text-align: center;
+  border-left: 3px solid var(--gold-bright);
+  border-right: 3px solid var(--gold-bright);
+  padding: 10px 20px;
+  background: rgba(116, 21, 29, 0.25);
+}
+
+article p:not(.lead)::first-letter {
+  font-family: "Cinzel", serif;
+  font-size: 3.2rem;
+  float: left;
+  line-height: 0.8;
+  padding-right: 12px;
+  padding-top: 4px;
+  color: var(--gold-bright);
+  font-weight: 700;
+}
+
+.gallery {
+  position: relative;
+  width: 100%;
+  margin-top: 60px;
+  overflow: hidden;
+  border: 3px solid var(--gold-magical);
+  background: var(--gryffindor-red);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border-radius: 2px;
+}
+
+.gallery-track {
+  display: flex;
+  width: 300%;
+  animation: magic-carousel 16s infinite ease-in-out;
+}
+
+.slide {
+  position: relative;
+  width: 33.333333%;
+  aspect-ratio: 16 / 9;
+  margin: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.1) saturate(1.15);
+}
+
+@keyframes magic-carousel {
+  0%, 28% { transform: translateX(0); }
+  33%, 61% { transform: translateX(-33.333333%); }
+  66%, 94% { transform: translateX(-66.666666%); }
+  100% { transform: translateX(0); }
+}
+
+footer {
+  padding: 40px 20px;
+  border-top: 3px solid var(--gold-bright);
+  background: var(--gryffindor-red);
+  text-align: center;
+}
+
+footer p {
+  margin: 4px 0;
+  color: #e5cbcb;
+  font-size: 0.9rem;
+}
+
+footer p:last-child {
+  color: var(--gold-bright);
+  font-family: "Cinzel", serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 768px) {
+  article {
+    padding: 30px 20px;
+  }
+  
+  .hero {
+    min-height: 420px;
+  }
+
+  .lead {
+    font-size: 1.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .gallery-track { animation: none; }
+}
