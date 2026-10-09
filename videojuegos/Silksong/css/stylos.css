@@ -1,0 +1,96 @@
+/*estilos generales*/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0b0c10; /* Fondo oscuro estilo cueva / Pharloom */
+    color: #c5c6c7;            /* Texto claro legible */
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1.6;
+    padding: 20px;
+}
+
+/* header*/
+#header-principal {
+    text-align: center;
+    padding: 40px 20px;
+    border-bottom: 2px solid #a81c34; /* Línea divisoria carmesí */
+    margin-bottom: 40px;
+}
+
+#titulo-juego {
+    font-family: 'Cinzel Decorative', serif; /* Fuente estilo logo Hollow Knight */
+    color: #a81c34;                          /* Rojo Carmesí del vestido de Hornet */
+    font-size: 2.8rem;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(168, 28, 52, 0.4); /* Resplandor suave tenue */
+}
+
+/* ==========================================================================
+   GRID LAYOUT (CONTENEDOR PRINCIPAL)
+   ========================================================================== */
+#contenedor-principal {
+    display: grid;
+    /* Divide la pantalla en 2 columnas: Texto a la izquierda, Imagen a la derecha */
+    grid-template-columns: 1fr 1fr; 
+    gap: 40px;                       /* Espacio entre la imagen y el texto */
+    max-width: 1200px;
+    margin: 0 auto;                  /* Centra el contenedor en la pantalla */
+    align-items: center;             /* Alinea ambos bloques a la misma altura vertical */
+}
+
+
+#descripcion-juego {
+    background-color: #1f2833;
+    padding: 30px;
+    border-radius: 8px;
+    border-left: 4px solid #a81c34; /* Detalle carmesí en el borde */
+}
+
+#descripcion-juego h2 {
+    font-family: 'Cinzel Decorative', serif;
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+}
+
+#descripcion-juego p {
+    margin-bottom: 15px;
+    font-size: 1rem;
+    text-align: justify;
+}
+
+/*imagen*/
+#contenedor-imagen {
+    display: flex;
+    justify-content: flex-end; /* Alinea el contenido a la derecha */
+}
+
+#imagen-promocional {
+    width: 100%;
+    max-width: 500px;
+    height: auto;              /* Mantiene la proporción de la foto sin deformar */
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+    border: 1px solid #333;
+}
+
+
+/* @media (max-width: 768px) {
+    #contenedor-principal {
+        /* Pasa de 2 columnas a 1 sola columna para que no se pisen 
+        grid-template-columns: 1fr; 
+    }
+
+    #contenedor-imagen {
+        justify-content: center; /* En móviles centra la imagen debajo o encima 
+    }
+
+    #titulo-juego {
+        font-size: 1.8rem;
+    }
+}
+ */
