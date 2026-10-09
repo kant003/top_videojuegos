@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Last of Us · Endure and survive</title>
+    <meta name="description" content="Resumen completo, detalles e información sobre los creadores de The Last of Us." />
+    
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,900;1,9..144,500&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --color-bg: #0a0b0c;
+            --color-card-bg: #141618;
+            --color-text-main: #e0e0e0;
+            --color-text-muted: #a0a0a0;
+            --color-accent: #bf9b30;
+            --color-border: #2a2d30;
+            
+            --font-heading: 'Fraunces', serif;
+            --font-body: 'Instrument Sans', sans-serif;
+            --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text-main);
+            font-family: var(--font-body);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .salto {
+            position: absolute;
+            top: -100px;
+            left: 0;
+            background: var(--color-accent);
+            color: #000;
+            padding: 8px 16px;
+            z-index: 100;
+            text-decoration: none;
+            font-weight: bold;
+            transition: top 0.3s;
+        }
+
+        .salto:focus {
+            top: 0;
+        }
+
+        /* HERO / CABECERA */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero__img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            filter: brightness(0.35) contrast(1.1);
+        }
+
+        .esporas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIHZpZXdCb3g9IjAgMCA0IDQiPjxnIGZpbGwtbGluZWFyLWdyYWRpZW50PSJmYWxsYmFjayIpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjRjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIi8+PC9nPjwvc3ZnPg==');
+            opacity: 0.1;
+            z-index: 2;
+        }
+
+        .hero__texto {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            max-width: 700px;
+            padding: 0 20px;
+        }
+
+        .lema {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--color-accent);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .hero h1 {
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: #fff;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.8);
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        main {
+            max-width: 800px;
+            margin: -30px auto 0;
+            padding: 0 20px 60px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .seccion {
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-card);
+            transition: border-color 0.3s ease;
+        }
+
+        .seccion:hover {
+            border-color: #3a3f44;
+        }
+
+        .seccion h2 {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 22px;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        .seccion p {
+            font-size: 0.98rem;
+            color: var(--color-text-main);
+            margin-bottom: 14px;
+            text-align: justify;
+        }
+
+        .seccion strong {
+            color: var(--color-accent);
+            font-weight: 600;
+        }
+
+        /* Lista de Creadores */
+        .creadores-box {
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px dashed var(--color-border);
+        }
+
+        .creadores-box p {
+            margin-bottom: 8px;
+        }
+
+        .creadores-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .creadores-box li {
+            font-size: 0.95rem;
+            color: var(--color-text-muted);
+            margin-bottom: 6px;
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            border-top: 1px solid var(--color-border);
+            color: var(--color-text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <a class="salto" href="#contenido">Saltar al contenido</a>
+
+    <!-- HEADER / HERO -->
+    <header class="hero">
+        <div class="esporas" aria-hidden="true"></div>
+        <img
+            class="hero__img"
+            src="https://i.blogs.es/c171ed/the-last-of-us-part-i-remake-ps5-pc/840_560.jpeg"
+            alt="Escenario postapocalíptico de The Last of Us"
+        />
+        <div class="hero__texto">
+            <p class="lema">Endure and Survive</p>
+            <h1>The Last of Us</h1>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main id="contenido">
+        <section class="seccion">
+            <h2>Resumen General</h2>
+            <div>
+                <p>
+                    <strong>The Last of Us</strong> es una obra maestra de acción, aventura y supervivencia ambientada en un mundo postapocalíptico devastado. Veinte años después de que una mutación del hongo <em>Cordyceps</em> colapsara la civilización moderna transformando a la población en criaturas violentas y ciegas (como los amenazantes Chasqueadores), la sociedad malvive en zonas de cuarentena militarizadas y campamentos de cazadores rebeldes.
+                </p>
+                <p>
+                    La narrativa sigue a <strong>Joel</strong>, un curtido contrabandista traumatizado por trágicas pérdidas del pasado, quien recibe el encargo de escoltar a <strong>Ellie</strong>, una adolescente de 14 años inmune a la infección, a través de unos Estados Unidos en ruinas. Lo que inicia como una simple misión de transporte se transforma en un viaje desgarrador donde la supervivencia, la moralidad y la evolución del vínculo entre ambos forman el núcleo emocional del juego.
+                </p>
+                <p>
+                    Su jugabilidad combina de forma equilibrada la <strong>gestión de recursos escasos, la elaboración de herramientas, el sigilo estratégico y el combate visceral</strong>. Cada enfrentamiento exige planificar minuciosamente los movimientos, ya que la munición es limitada y la amenaza de los infectados o de otros supervivientes hostiles es permanente.
+                </p>
+                <p>
+                    Aclamado mundialmente por su narrativa cinematográfica y galardonado con más de 200 premios al <em>Juego del Año</em>, el título cuenta además con una memorable e icónica banda sonora acústica que enfatiza la soledad y belleza de su mundo en ruinas.
+                </p>
+
+                <!-- Ficha de Creadores y Desarrollo -->
+                <div class="creadores-box">
+                    <p><strong>Ficha Técnica y Creadores:</strong></p>
+                    <ul>
+                        <li><strong>Desarrolladora:</strong> Naughty Dog</li>
+                        <li><strong>Directores / Creadores principales:</strong> Neil Druckmann y Bruce Straley</li>
+                        <li><strong>Distribuidora:</strong> Sony Computer Entertainment / SIE</li>
+                        <li><strong>Compositor de Banda Sonora:</strong> Gustavo Santaolalla</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; The Last of Us · Endure and Survive</p>
+    </footer>
+</body>
+</html>

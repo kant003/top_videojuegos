@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basket George 🏀</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background: linear-gradient(135deg, #111827, #1f2937);
+        color: white;
+        font-family: Arial, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .game {
+        width: min(1100px, 100%);
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 42px;
+        margin-bottom: 12px;
+        text-shadow: 0 4px 10px rgba(0,0,0,.4);
+    }
+
+    .scoreboard {
+        background: #0b1220;
+        border-radius: 18px 18px 0 0;
+        padding: 14px 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 45px;
+        border: 2px solid #374151;
+    }
+
+    .team {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .score {
+        font-size: 42px;
+        color: #fbbf24;
+        font-weight: 900;
+    }
+
+    .timer {
+        font-size: 25px;
+        font-weight: bold;
+        color: #60a5fa;
+    }
+
+    canvas {
+        width: 100%;
+        display: block;
+        background: #c98245;
+        border: 3px solid #374151;
+        border-top: none;
+        cursor: crosshair;
+    }
+
+    .controls {
+        margin-top: 15px;
+        background: #111827;
+        padding: 15px;
+        border-radius: 15px;
+        border: 1px solid #374151;
+    }
+
+    .power-container {
+        max-width: 500px;
+        margin: auto;
+    }
+
+    .power-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        font-weight: bold;
+    }
+
+    .power-bar {
+        width: 100%;
+        height: 20px;
+        background: #374151;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    #power {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+        transition: width .05s;
+    }
+
+    .buttons {
+        margin-top: 12px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    button {
+        border: none;
+        padding: 12px 22px;
+        border-radius: 10px;
+        background: #2563eb;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    #restart {
+        background: #dc2626;
+    }
+
+    .instructions {
+        margin-top: 12px;
+        color: #d1d5db;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    #message {
+        min-height: 25px;
+        margin-top: 8px;
+        font-weight: bold;
+        color: #fbbf24;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <h1>🏀 BASKET CLASH</h1>
+
+    <div class="scoreboard">
+        <div class="team">
+            🔵 TÚ
+            <div class="score" id="playerScore">0</div>
+        </div>
+
+        <div>
+            <div class="timer" id="timer">60</div>
+            <small>TIEMPO</small>
+        </div>
+
+        <div class="team">
+            🔴 RIVAL
+            <div class="score" id="enemyScore">0</div>
+        </div>
+    </div>
+
+    <canvas id="canvas" width="1000" height="600"></canvas>
+
+    <div class="controls">
+
+        <div class="power-container">
+            <div class="power-label">
+                <span>💥 POTENCIA</span>
+                <span id="powerText">0%</span>
+            </div>
+
+            <div class="power-bar">
+                <div id="power"></div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button id="shootButton">🏀 LANZAR</button>
+            <button id="restart">🔄 REINICIAR</button>
+        </div>
+
+        <div id="message">
+            Muévete con WASD o las flechas. Mantén ESPACIO para cargar el tiro.
+        </div>
+
+        <div class="instructions">
+            <b>WASD / Flechas:</b> moverte &nbsp; | &nbsp;
+            <b>ESPACIO:</b> cargar/lanzar &nbsp; | &nbsp;
+            <b>R:</b> reiniciar
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const playerScoreElement = document.getElementById("playerScore");
+const enemyScoreElement = document.getElementById("enemyScore");
+const timerElement = document.getElementById("timer");
+const powerElement = document.getElementById("power");
+const powerText = document.getElementById("powerText");
+const message = document.getElementById("message");
+
+const shootButton = document.getElementById("shootButton");
+const restartButton = document.getElementById("restart");
+
+let playerScore = 0;
+let enemyScore = 0;
+
+let time = 60;
+
+let gameRunning = true;
+let charging = false;
+let power = 0;
+let powerDirection = 1;
+
+let keys = {};
+
+let lastTime = 0;
+let enemyShotTimer = 0;
+
+let ball = {
+    x: 250,
+    y: 450,
+    vx: 0,
+    vy: 0,
+    flying: false
+};
+
+const player = {
+    x: 220,
+    y: 470,
+    width: 42,
+    height: 70,
+    speed: 300
+};
+
+const enemy = {
+    x: 700,
+    y: 470,
+    width: 42,
+    height: 70,
+    speed: 120
+};
+
+const hoop = {
+    x: 870,
+    y: 245,
+    width: 90,
+    height: 100
+};
+
+
+/* =========================
+   CONTROLES
+========================= */
+
+document.addEventListener("keydown", e => {
+
+    keys[e.key.toLowerCase()] = true;
+
+    if (e.code === "Space") {
+
+        e.preventDefault();
+
+        if (!charging && gameRunning && !ball.flying) {
+            charging = true;
+        }
+    }
+
+    if (e.key.toLowerCase() === "r") {
+        restartGame();
+    }
+
+});
+
+
+document.addEventListener("keyup", e => {
+
+    keys[e.key.toLowerCase()] = false;
+
+    if (e.code === "Space" && charging) {
+        shoot();
+    }
+
+});
+
+
+shootButton.addEventListener("mousedown", () => {
+
+    if (!charging && gameRunning && !ball.flying) {
+        charging = true;
+    }
+
+});
+
+
+shootButton.addEventListener("mouseup", () => {
+
+    if (charging) {
+        shoot();
+    }
+
+});
+
+
+shootButton.addEventListener("touchstart", e => {
+
+    e.preventDefault();
+
+    if (!charging && gameRunning && !ball.flying) {
+        charging = true;
+    }
+
+});
+
+
+shootButton.addEventListener("touchend", e => {
+
+    e.preventDefault();
+
+    if (charging) {
+        shoot();
+    }
+
+});
+
+
+restartButton.addEventListener("click", restartGame);
+
+
+/* =========================
+   REINICIAR
+========================= */
+
+function restartGame() {
+
+    playerScore = 0;
+    enemyScore = 0;
+
+    time = 60;
+
+    gameRunning = true;
+
+    player.x = 220;
+    player.y = 470;
+
+    enemy.x = 700;
+    enemy.y = 470;
+
+    resetBall();
+
+    message.textContent =
+        "Muévete con WASD o las flechas. Mantén ESPACIO para cargar el tiro.";
+
+    updateScore();
+
+}
+
+
+/* =========================
+   BALÓN
+========================= */
+
+function resetBall() {
+
+    ball.x = player.x + 30;
+    ball.y = player.y - 20;
+
+    ball.vx = 0;
+    ball.vy = 0;
+
+    ball.flying = false;
+
+    charging = false;
+    power = 0;
+
+}
+
+
+/* =========================
+   LANZAMIENTO
+========================= */
+
+function shoot() {
+
+    if (!gameRunning || ball.flying) return;
+
+    charging = false;
+
+    const strength = power / 100;
+
+    /*
+        Cuanto más potencia,
+        más velocidad.
+    */
+
+    ball.x = player.x + 25;
+    ball.y = player.y - 25;
+
+    ball.vx = 550 + strength * 350;
+    ball.vy = -(650 + strength * 500);
+
+    ball.flying = true;
+
+    power = 0;
+
+    message.textContent = "🏀 ¡Lanzamiento!";
+
+}
+
+
+/* =========================
+   ACTUALIZAR JUGADOR
+========================= */
+
+function updatePlayer(dt) {
+
+    let dx = 0;
+    let dy = 0;
+
+    if (keys["arrowleft"] || keys["a"]) dx -= 1;
+    if (keys["arrowright"] || keys["d"]) dx += 1;
+
+    if (keys["arrowup"] || keys["w"]) dy -= 1;
+    if (keys["arrowdown"] || keys["s"]) dy += 1;
+
+    player.x += dx * player.speed * dt;
+    player.y += dy * player.speed * dt;
+
+    player.x = Math.max(40, Math.min(760, player.x));
+    player.y = Math.max(360, Math.min(510, player.y));
+
+}
+
+
+/* =========================
+   ACTUALIZAR POTENCIA
+========================= */
+
+function updatePower() {
+
+    if (!charging) return;
+
+    power += powerDirection * 2;
+
+    if (power >= 100) {
+        power = 100;
+        powerDirection = -1;
+    }
+
+    if (power <= 0) {
+        power = 0;
+        powerDirection = 1;
+    }
+
+    powerElement.style.width = power + "%";
+    powerText.textContent = Math.round(power) + "%";
+
+}
+
+
+/* =========================
+   FÍSICA DEL BALÓN
+========================= */
+
+function updateBall(dt) {
+
+    if (!ball.flying) {
+
+        if (!charging) {
+            ball.x = player.x + 25;
+            ball.y = player.y - 25;
+        }
+
+        return;
+    }
+
+    ball.x += ball.vx * dt;
+    ball.y += ball.vy * dt;
+
+    ball.vy += 1100 * dt;
+
+
+    /*
+        Comprobar canasta
+    */
+
+    if (
+        ball.x > hoop.x &&
+        ball.x < hoop.x + hoop.width &&
+        ball.y > hoop.y &&
+        ball.y < hoop.y + 30 &&
+        ball.vy > 0
+    ) {
+
+        let points = 2;
+
+        if (player.x < 520) {
+            points = 3;
+        }
+
+        playerScore += points;
+
+        message.textContent =
+            "🔥 ¡TRIPLE! +" + points + " puntos";
+
+        updateScore();
+
+        resetBall();
+
+        return;
+    }
+
+
+    /*
+        Balón fuera
+    */
+
+    if (
+        ball.x > canvas.width + 50 ||
+        ball.y > canvas.height + 50 ||
+        ball.y < -100
+    ) {
+
+        message.textContent = "❌ ¡Fallaste!";
+
+        resetBall();
+    }
+
+}
+
+
+/* =========================
+   IA DEL RIVAL
+========================= */
+
+function updateEnemy(dt) {
+
+    /*
+        El rival se acerca lentamente
+        al jugador.
+    */
+
+    if (enemy.x > player.x + 100) {
+        enemy.x -= enemy.speed * dt;
+    }
+
+    if (enemy.x < player.x + 140) {
+        enemy.x += enemy.speed * dt;
+    }
+
+    enemy.x = Math.max(550, Math.min(800, enemy.x));
+
+
+    /*
+        El rival lanza cada cierto tiempo.
+    */
+
+    enemyShotTimer += dt;
+
+    if (enemyShotTimer > 4 && !ball.flying) {
+
+        enemyShotTimer = 0;
+
+        if (Math.random() < 0.65) {
+
+            enemyScore += Math.random() < 0.35 ? 3 : 2;
+
+            updateScore();
+
+            message.textContent =
+                "🔴 El rival ha anotado";
+        }
+    }
+
+}
+
+
+/* =========================
+   MARCADOR
+========================= */
+
+function updateScore() {
+
+    playerScoreElement.textContent = playerScore;
+    enemyScoreElement.textContent = enemyScore;
+
+}
+
+
+/* =========================
+   TIEMPO
+========================= */
+
+let timeAccumulator = 0;
+
+function updateTimer(dt) {
+
+    timeAccumulator += dt;
+
+    if (timeAccumulator >= 1) {
+
+        timeAccumulator = 0;
+
+        time--;
+
+        timerElement.textContent = time;
+
+        if (time <= 0) {
+
+            gameRunning = false;
+
+            if (playerScore > enemyScore) {
+
+                message.textContent =
+                    "🏆 ¡HAS GANADO! " +
+                    playerScore +
+                    " - " +
+                    enemyScore;
+
+            } else if (playerScore < enemyScore) {
+
+                message.textContent =
+                    "😢 HAS PERDIDO " +
+                    playerScore +
+                    " - " +
+                    enemyScore;
+
+            } else {
+
+                message.textContent =
+                    "🤝 ¡EMPATE! " +
+                    playerScore +
+                    " - " +
+                    enemyScore;
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   DIBUJAR PISTA
+========================= */
+
+function drawCourt() {
+
+    /*
+        Suelo
+    */
+
+    ctx.fillStyle = "#c98245";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+    /*
+        Líneas de madera
+    */
+
+    ctx.strokeStyle = "rgba(80,40,15,.25)";
+    ctx.lineWidth = 2;
+
+    for (let x = 0; x < canvas.width; x += 70) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+
+        ctx.stroke();
+    }
+
+
+    /*
+        Línea central
+    */
+
+    ctx.strokeStyle = "rgba(255,255,255,.75)";
+    ctx.lineWidth = 4;
+
+    ctx.beginPath();
+
+    ctx.moveTo(500, 0);
+    ctx.lineTo(500, 600);
+
+    ctx.stroke();
+
+
+    /*
+        Círculo central
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(500, 300, 75, 0, Math.PI * 2);
+
+    ctx.stroke();
+
+
+    /*
+        Zona de triple
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(870, 300, 250, Math.PI / 2, Math.PI * 1.5);
+
+    ctx.stroke();
+
+
+    /*
+        Zona de la canasta
+    */
+
+    ctx.strokeRect(770, 170, 230, 260);
+
+
+    /*
+        Tablero
+    */
+
+    ctx.fillStyle = "#f3f4f6";
+
+    ctx.fillRect(
+        hoop.x + 65,
+        hoop.y - 75,
+        12,
+        110
+    );
+
+    ctx.strokeStyle = "#111827";
+
+    ctx.strokeRect(
+        hoop.x + 65,
+        hoop.y - 75,
+        12,
+        110
+    );
+
+
+    /*
+        Cuadrado del tablero
+    */
+
+    ctx.strokeStyle = "#ef4444";
+
+    ctx.lineWidth = 4;
+
+    ctx.strokeRect(
+        hoop.x + 35,
+        hoop.y - 20,
+        60,
+        45
+    );
+
+
+    /*
+        Aro
+    */
+
+    ctx.strokeStyle = "#f97316";
+
+    ctx.lineWidth = 9;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        hoop.x + 35,
+        hoop.y + 10,
+        30,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.stroke();
+
+
+    /*
+        Red
+    */
+
+    ctx.strokeStyle = "rgba(255,255,255,.7)";
+    ctx.lineWidth = 2;
+
+    for (let i = -25; i <= 25; i += 10) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(hoop.x + 35 + i, hoop.y + 15);
+        ctx.lineTo(hoop.x + 35 + i * .65, hoop.y + 70);
+
+        ctx.stroke();
+    }
+
+}
+
+
+/* =========================
+   DIBUJAR JUGADOR
+========================= */
+
+function drawPlayer() {
+
+    /*
+        Sombra
+    */
+
+    ctx.fillStyle = "rgba(0,0,0,.25)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        player.x + 20,
+        player.y + 10,
+        30,
+        8,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /*
+        Cuerpo
+    */
+
+    ctx.fillStyle = "#2563eb";
+
+    ctx.fillRect(
+        player.x,
+        player.y - 40,
+        40,
+        55
+    );
+
+
+    /*
+        Camiseta
+    */
+
+    ctx.fillStyle = "#1d4ed8";
+
+    ctx.fillRect(
+        player.x + 8,
+        player.y - 40,
+        24,
+        55
+    );
+
+
+    /*
+        Cabeza
+    */
+
+    ctx.fillStyle = "#b97850";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        player.x + 20,
+        player.y - 55,
+        17,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /*
+        Pelo
+    */
+
+    ctx.fillStyle = "#111827";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        player.x + 20,
+        player.y - 62,
+        17,
+        Math.PI,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /*
+        Piernas
+    */
+
+    ctx.strokeStyle = "#111827";
+    ctx.lineWidth = 9;
+
+    ctx.beginPath();
+
+    ctx.moveTo(player.x + 12, player.y + 15);
+    ctx.lineTo(player.x + 7, player.y + 45);
+
+    ctx.moveTo(player.x + 28, player.y + 15);
+    ctx.lineTo(player.x + 35, player.y + 45);
+
+    ctx.stroke();
+
+
+    /*
+        Zapatillas
+    */
+
+    ctx.strokeStyle = "#f8fafc";
+    ctx.lineWidth = 7;
+
+    ctx.beginPath();
+
+    ctx.moveTo(player.x + 3, player.y + 45);
+    ctx.lineTo(player.x + 15, player.y + 45);
+
+    ctx.moveTo(player.x + 31, player.y + 45);
+    ctx.lineTo(player.x + 43, player.y + 45);
+
+    ctx.stroke();
+
+}
+
+
+/* =========================
+   DIBUJAR RIVAL
+========================= */
+
+function drawEnemy() {
+
+    /*
+        Sombra
+    */
+
+    ctx.fillStyle = "rgba(0,0,0,.25)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        enemy.x + 20,
+        enemy.y + 10,
+        30,
+        8,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /*
+        Cuerpo
+    */
+
+    ctx.fillStyle = "#dc2626";
+
+    ctx.fillRect(
+        enemy.x,
+        enemy.y - 40,
+        40,
+        55
+    );
+
+
+    /*
+        Cabeza
+    */
+
+    ctx.fillStyle = "#a86b4c";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        enemy.x + 20,
+        enemy.y - 55,
+        17,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /*
+        Pelo
+    */
+
+    ctx.fillStyle = "#111827";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        enemy.x + 20,
+        enemy.y - 62,
+        17,
+        Math.PI,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /*
+        Piernas
+    */
+
+    ctx.strokeStyle = "#111827";
+    ctx.lineWidth = 9;
+
+    ctx.beginPath();
+
+    ctx.moveTo(enemy.x + 12, enemy.y + 15);
+    ctx.lineTo(enemy.x + 7, enemy.y + 45);
+
+    ctx.moveTo(enemy.x + 28, enemy.y + 15);
+    ctx.lineTo(enemy.x + 35, enemy.y + 45);
+
+    ctx.stroke();
+
+}
+
+
+/* =========================
+   DIBUJAR BALÓN
+========================= */
+
+function drawBall() {
+
+    ctx.fillStyle = "#f97316";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        ball.x,
+        ball.y,
+        13,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    ctx.strokeStyle = "#7c2d12";
+
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        ball.x,
+        ball.y,
+        9,
+        -Math.PI / 2,
+        Math.PI / 2
+    );
+
+    ctx.stroke();
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(ball.x - 12, ball.y);
+    ctx.quadraticCurveTo(
+        ball.x,
+        ball.y - 5,
+        ball.x + 12,
+        ball.y
+    );
+
+    ctx.stroke();
+
+}
+
+
+/* =========================
+   LOOP PRINCIPAL
+========================= */
+
+function gameLoop(timestamp) {
+
+    let dt = (timestamp - lastTime) / 1000;
+
+    if (dt > 0.05) {
+        dt = 0.05;
+    }
+
+    lastTime = timestamp;
+
+
+    if (gameRunning) {
+
+        updatePlayer(dt);
+        updateEnemy(dt);
+        updateBall(dt);
+        updatePower();
+        updateTimer(dt);
+
+    }
+
+
+    /*
+        Dibujar
+    */
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    drawCourt();
+    drawPlayer();
+    drawEnemy();
+    drawBall();
+
+
+    requestAnimationFrame(gameLoop);
+}
+
+
+/* =========================
+   INICIAR
+========================= */
+
+restartGame();
+
+requestAnimationFrame(gameLoop);
+
+</script>
+
+</body>
+</html>
