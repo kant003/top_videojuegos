@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Touchdown Run Enhanced</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Inter:wght@400;600;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at center, #1b3826 0%, #0d1a12 100%);
+            color: #f3f4f6;
+            touch-action: none;
+            user-select: none;
+        }
+        .font-teko { font-family: 'Teko', sans-serif; }
+        .grid-bg {
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        canvas {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4 md:p-6 grid-bg">
+
+    <header class="w-full max-w-5xl flex flex-col md:flex-row items-center justify-between bg-zinc-900/80 backdrop-blur-md border border-zinc-800 px-6 py-3 rounded-2xl shadow-xl gap-4">
+        <div class="flex items-center gap-3">
+            <div class="bg-amber-500 text-zinc-950 font-teko text-3xl px-3 py-1 rounded-xl font-bold tracking-wider uppercase shadow-lg shadow-amber-500/20">
+                TD RUN+
+            </div>
+            <div>
+                <h1 class="font-teko text-2xl tracking-wide text-zinc-100 leading-none">GRIDIRON GLORY</h1>
+                <p class="text-xs text-zinc-400">Modo Arcade Avanzado</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6 text-sm font-semibold">
+            <div class="flex flex-col items-center">
+                <span class="text-zinc-400 text-xs uppercase tracking-wider">Puntos</span>
+                <span id="puntos" class="font-teko text-3xl text-amber-400 leading-none">0</span>
+            </div>
+            <div class="h-8 w-[1px] bg-zinc-800"></div>
+            <div class="flex flex-col items-center">
+                <span class="text-zinc-400 text-xs uppercase tracking-wider">Vidas</span>
+                <div id="vidas" class="flex gap-1 pt-1 text-red-500 text-lg">❤️❤️❤️</div>
+            </div>
+            <div class="h-8 w-[1px] bg-zinc-800"></div>
+            <div class="flex flex-col items-center">
+                <span class="text-zinc-400 text-xs uppercase tracking-wider">Nivel</span>
+                <span id="nivel" class="font-teko text-3xl text-emerald-400 leading-none">1</span>
+            </div>
+            <div class="h-8 w-[1px] bg-zinc-800"></div>
+            <div class="flex flex-col items-center">
+                <span class="text-zinc-400 text-xs uppercase tracking-wider">Oro / Monedas</span>
+                <span id="oro" class="font-teko text-3xl text-yellow-300 leading-none">🪙 0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative w-full max-w-5xl flex flex-col items-center my-4">
+        <div class="relative w-full aspect-[2/1] rounded-2xl overflow-hidden border-4 border-zinc-800 shadow-2xl">
+            <canvas id="campo" class="w-full h-full block"></canvas>
+
+            <!-- Overlay de Mensajes / Menús / Tienda -->
+            <div id="overlay" class="absolute inset-0 bg-zinc-950/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center transition-all duration-300 z-20">
+                <div id="menu-inicio" class="flex flex-col items-center max-w-lg">
+                    <h2 class="font-teko text-6xl text-amber-400 mb-2 tracking-wide drop-shadow-md">TOUCHDOWN RUN EXTREME</h2>
+                    <p class="text-zinc-300 text-sm mb-6 leading-relaxed">
+                        Esquiva a los defensas rivales, usa tu <strong class="text-amber-300">TURBO (Shift/Espacio)</strong> y activa giros de finta (<strong class="text-cyan-300">Tecla F o Click Derecho</strong>) para evitar placajes. ¡Recoge power-ups dorados en el campo!
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full mb-6 text-left text-xs bg-zinc-900/90 p-4 rounded-xl border border-zinc-800">
+                        <div>🎮 <strong>Movimiento:</strong> WASD / Flechas</div>
+                        <div>⚡ <strong>Turbo:</strong> Shift Izq / Espacio</div>
+                        <div>🌀 <strong>Finta / Esquive:</strong> Tecla F</div>
+                        <div>⭐ <strong>Objetivo:</strong> Zona roja derecha</div>
+                    </div>
+                    <button onclick="iniciarJuego()" class="bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-zinc-950 font-teko text-3xl px-8 py-3 rounded-xl font-bold tracking-wider shadow-lg shadow-amber-500/30 transition-all transform hover:scale-105 active:scale-95 cursor-pointer">
+                        ¡COMENZAR PARTIDO!
+                    </button>
+                </div>
+
+                <div id="menu-tienda" class="hidden flex flex-col items-center max-w-xl w-full">
+                    <h2 id="tienda-titulo" class="font-teko text-5xl text-emerald-400 mb-1 tracking-wide">¡TOUCHDOWN ANOTADO!</h2>
+                    <p id="tienda-sub" class="text-zinc-300 text-sm mb-4">Mejora tus atributos antes del siguiente drive.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 w-full mb-6">
+                        <div class="bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-amber-400 text-base">Velocidad Base</h3>
+                                <p class="text-xs text-zinc-400 mt-1">Corre más rápido por defecto.</p>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span id="val-vel" class="text-sm font-bold">Nv. 1</span>
+                                <button onclick="comprarMejora('velocidad')" class="bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold px-3 py-1.5 rounded-lg text-xs cursor-pointer transition">🪙 <span id="costo-vel">50</span></button>
+                            </div>
+                        </div>
+                        <div class="bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-cyan-400 text-base">Capacidad Turbo</h3>
+                                <p class="text-xs text-zinc-400 mt-1">Más barra de estamina.</p>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span id="val-turbo" class="text-sm font-bold">Nv. 1</span>
+                                <button onclick="comprarMejora('turbo')" class="bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-bold px-3 py-1.5 rounded-lg text-xs cursor-pointer transition">🪙 <span id="costo-turbo">50</span></button>
+                            </div>
+                        </div>
+                        <div class="bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-purple-400 text-base">Enfriamiento Finta</h3>
+                                <p class="text-xs text-zinc-400 mt-1">Fintas más frecuentes.</p>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span id="val-finta" class="text-sm font-bold">Nv. 1</span>
+                                <button onclick="comprarMejora('finta')" class="bg-purple-500 hover:bg-purple-400 text-zinc-950 font-bold px-3 py-1.5 rounded-lg text-xs cursor-pointer transition">🪙 <span id="costo-finta">50</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="btn-tienda-cerrar" onclick="cerrarTienda()" class="bg-gradient-to-r from-emerald-500 to-green-400 hover:from-emerald-400 hover:to-green-300 text-zinc-950 font-teko text-3xl px-8 py-3 rounded-xl font-bold tracking-wider shadow-lg shadow-emerald-500/30 transition-all transform hover:scale-105 active:scale-95 cursor-pointer">
+                        SIGUIENTE DRIVE 🏈
+                    </button>
+                </div>
+
+                <div id="menu-gameover" class="hidden flex flex-col items-center max-w-md">
+                    <h2 class="font-teko text-6xl text-red-500 mb-2 tracking-wide">FIN DEL PARTIDO</h2>
+                    <p id="gameover-texto" class="text-zinc-300 text-base mb-6">Conseguiste 0 puntos totales.</p>
+                    <button onclick="iniciarJuego()" class="bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-zinc-950 font-teko text-3xl px-8 py-3 rounded-xl font-bold tracking-wider shadow-lg shadow-amber-500/30 transition-all transform hover:scale-105 active:scale-95 cursor-pointer">
+                        JUGAR NUEVAMENTE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div class="bg-zinc-900/90 border border-zinc-800 p-3 rounded-xl flex items-center gap-4">
+                <span class="font-teko text-amber-400 text-xl tracking-wider w-24">ESTAMINA / TURBO</span>
+                <div class="flex-1 bg-zinc-800 h-4 rounded-full overflow-hidden p-0.5 border border-zinc-700">
+                    <div id="barra-estamina" class="bg-gradient-to-r from-amber-500 to-yellow-300 h-full rounded-full transition-all duration-75" style="width: 100%;"></div>
+                </div>
+                <span id="txt-estamina" class="text-xs font-mono text-zinc-400 w-10 text-right">100%</span>
+            </div>
+
+            <div class="bg-zinc-900/90 border border-zinc-800 p-3 rounded-xl flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <span class="font-teko text-cyan-400 text-xl tracking-wider">FINTA (TECLA F)</span>
+                    <span id="estado-finta" class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs px-2.5 py-1 rounded-lg font-bold">¡LISTA!</span>
+                </div>
+                <div class="text-xs text-zinc-400" id="estado-buffs">🛡️ Escudo: Inactivo</div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center text-xs text-zinc-500 mt-2 flex flex-wrap justify-center gap-4">
+        <span>🏃‍♂️ Movimiento: <strong class="text-zinc-300">WASD / Flechas</strong></span>
+        <span>⚡ Sprint Turbo: <strong class="text-zinc-300">Shift / Espacio</strong></span>
+        <span>🌀 Finta / Esquive: <strong class="text-zinc-300">Tecla F</strong></span>
+        <span>🪙 Coleccionables: <strong class="text-amber-400">Balones Dorados & Potenciadores</strong></span>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('campo');
+        const ctx = canvas.getContext('2d');
+        const puntosEl = document.getElementById('puntos');
+        const vidasEl = document.getElementById('vidas');
+        const nivelEl = document.getElementById('nivel');
+        const oroEl = document.getElementById('oro');
+        const overlay = document.getElementById('overlay');
+        const menuInicio = document.getElementById('menu-inicio');
+        const menuTienda = document.getElementById('menu-tienda');
+        const menuGameover = document.getElementById('menu-gameover');
+        const barraEstamina = document.getElementById('barra-estamina');
+        const txtEstamina = document.getElementById('txt-estamina');
+        const estadoFintaEl = document.getElementById('estado-finta');
+        const estadoBuffsEl = document.getElementById('estado-buffs');
+
+        const ZONA = 80;
+        const teclas = {};
+        let tiempo = 0;
+        let estadoJuego = 'inicio'; // 'inicio' | 'jugando' | 'pausa' | 'tienda' | 'fin'
+
+        // Estadísticas del jugador y mejoras
+        let puntos = 0;
+        let vidas = 3;
+        let nivel = 1;
+        let oro = 0;
+
+        let jugador = {
+            x: ZONA + 30,
+            y: 200,
+            r: 13,
+            velBase: 3.5,
+            velTurboMult: 1.8,
+            estamina: 100,
+            estaminaMax: 100,
+            fintaCdMax: 120, // frames
+            fintaCd: 0,
+            fintando: false,
+            fintaDuracion: 0,
+            invulnerable: 0,
+            escudo: false,
+            dir: 1,
+            moviendo: false,
+            fase: 0
+        };
+
+        let mejoras = {
+            velocidad: { nivel: 1, costo: 40 },
+            turbo: { nivel: 1, costo: 40 },
+            finta: { nivel: 1, costo: 40 },
+            vida: { nivel: 1, costo: 120 }
+        };
+
+        let defensas = [];
+        let coleccionables = [];
+        let particulas = [];
+        let textosFlotantes = [];
+
+        // Tipos de Defensas
+        const TIPOS_DEFENSA = [
+            { nombre: 'Veloz', colorCasco: '#3b82f6', colorCamisa: '#1e293b', vel: 1.4, agrasividad: 0.8 },
+            { nombre: 'Tanque', colorCasco: '#ef4444', colorCamisa: '#0f172a', vel: 0.9, agrasividad: 0.5, r: 15 },
+            { nombre: 'Perseguidor', colorCasco: '#eab308', colorCamisa: '#18181b', vel: 1.1, agrasividad: 1.1 },
+            { nombre: 'Interceptor', colorCasco: '#f97316', colorCamisa: '#3b0764', vel: 1.25, agrasividad: 0.9, predice: true },
+            { nombre: 'Muralla', colorCasco: '#a855f7', colorCamisa: '#111827', vel: 0.7, agrasividad: 0.4, r: 18 }
+        ];
+
+        // Tipos de Coleccionables
+        const TIPOS_COLECCIONABLE = [
+            { tipo: 'lento', simbolo: '⏳', color: '#22d3ee', valor: 1 },
+            { tipo: 'oro', simbolo: '🪙', color: '#eab308', valor: 25 },
+            { tipo: 'turbo', simbolo: '⚡', color: '#06b6d4', valor: 50 },
+            { tipo: 'escudo', simbolo: '🛡️️', color: '#a855f7', valor: 1 }
+        ];
+
+        const DIFICULTADES = {
+            rookie:   { n: 'ROOKIE',   desc: 'Más vidas y defensas lentas. Recompensas x0.8.', vel: 0.85, cant: 0.7, vidas: 4, oro: 0.8, tipos: 1 },
+            pro:      { n: 'PRO',      desc: 'Reto sólido: muchos defensas desde el primer drive.', vel: 1, cant: 1, vidas: 3, oro: 1, tipos: 2 },
+            leyenda:  { n: 'LEYENDA',  desc: 'Defensas rápidos y más numerosos. Recompensas x1.5.', vel: 1.15, cant: 1.25, vidas: 3, oro: 1.5, tipos: 3 },
+            infierno: { n: 'INFIERNO', desc: 'Todos anticipan tu carrera y solo tienes 2 vidas. Recompensas x2.5.', vel: 1.3, cant: 1.5, vidas: 2, oro: 2.5, tipos: 4, predice: true }
+        };
+        let dif = DIFICULTADES.pro;
+        let shake = 0, flash = 0, combo = 0, comboT = 0, lentoT = 0, celeb = 0, confeti = [];
+        let tiendaOrigen = 'td';
+
+        function setDificultad(k) {
+            dif = DIFICULTADES[k];
+            document.querySelectorAll('.dif-btn').forEach(b => {
+                const on = b.dataset.d === k;
+                b.classList.toggle('bg-amber-500', on); b.classList.toggle('text-zinc-950', on);
+                b.classList.toggle('bg-zinc-800', !on); b.classList.toggle('text-zinc-300', !on);
+            });
+            document.getElementById('dif-desc').textContent = dif.desc;
+        }
+        function guardar() { try { localStorage.setItem('tdrun', JSON.stringify({ oro, mejoras })); } catch (e) {} }
+        function cargar() {
+            try { const d = JSON.parse(localStorage.getItem('tdrun')); if (d) { oro = d.oro || 0; Object.assign(mejoras, d.mejoras); } } catch (e) {}
+        }
+        function refrescarTienda() {
+            for (const [k, id] of [['velocidad', 'vel'], ['turbo', 'turbo'], ['finta', 'finta'], ['vida', 'vida']]) {
+                document.getElementById('val-' + id).textContent = 'Nv. ' + mejoras[k].nivel;
+                document.getElementById('costo-' + id).textContent = mejoras[k].nivel >= 4 && k === 'vida' ? 'MAX' : mejoras[k].costo;
+            }
+            document.getElementById('tienda-sub').textContent = `Tienes 🪙 ${oro}. Las mejoras se conservan entre partidos.`;
+        }
+        function abrirTienda(origen) {
+            tiendaOrigen = origen;
+            document.getElementById('tienda-titulo').textContent = origen === 'td' ? '¡TOUCHDOWN ANOTADO!' : '🛒 TIENDA';
+            document.getElementById('btn-tienda-cerrar').textContent = origen === 'td' ? 'SIGUIENTE DRIVE 🏈' : 'VOLVER AL MENÚ';
+            refrescarTienda();
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            menuInicio.classList.add('hidden'); menuGameover.classList.add('hidden'); menuTienda.classList.remove('hidden');
+        }
+        function cerrarTienda() {
+            guardar();
+            if (tiendaOrigen === 'td') return siguienteNivel();
+            menuTienda.classList.add('hidden'); menuInicio.classList.remove('hidden');
+        }
+        function volverMenu() {
+            estadoJuego = 'inicio';
+            menuGameover.classList.add('hidden'); menuInicio.classList.remove('hidden');
+        }
+        function montarMenus() {
+            const btn = 'class="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-teko text-2xl px-6 py-1.5 rounded-xl tracking-wider mt-3 cursor-pointer transition"';
+            menuInicio.querySelector('button').insertAdjacentHTML('beforebegin',
+                '<div class="w-full mb-4"><p class="text-xs text-zinc-400 mb-2 uppercase tracking-wider">Dificultad</p><div class="grid grid-cols-2 md:grid-cols-4 gap-2">' +
+                Object.entries(DIFICULTADES).map(([k, d]) => `<button data-d="${k}" onclick="setDificultad('${k}')" class="dif-btn font-teko text-2xl py-1 rounded-lg border border-zinc-700 cursor-pointer transition">${d.n}</button>`).join('') +
+                '</div><p id="dif-desc" class="text-xs text-zinc-400 mt-2 h-4"></p></div>');
+            menuInicio.querySelector('button.bg-gradient-to-r').insertAdjacentHTML('afterend', `<button onclick="abrirTienda('menu')" ${btn}>🛒 TIENDA</button>`);
+            menuGameover.querySelector('button').insertAdjacentHTML('afterend', `<button onclick="volverMenu()" ${btn}>CAMBIAR DIFICULTAD</button>`);
+            const grid = menuTienda.querySelector('.grid');
+            grid.className = grid.className.replace('md:grid-cols-3', 'md:grid-cols-4');
+            grid.insertAdjacentHTML('beforeend', '<div class="bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl flex flex-col justify-between"><div><h3 class="font-bold text-red-400 text-base">Vida Extra</h3><p class="text-xs text-zinc-400 mt-1">+1 vida al empezar (máx. 4 niveles).</p></div><div class="mt-4 flex items-center justify-between"><span id="val-vida" class="text-sm font-bold">Nv. 1</span><button onclick="comprarMejora(\'vida\')" class="bg-red-500 hover:bg-red-400 text-zinc-950 font-bold px-3 py-1.5 rounded-lg text-xs cursor-pointer transition">🪙 <span id="costo-vida">120</span></button></div></div>');
+            menuTienda.classList.replace('max-w-xl', 'max-w-3xl');
+            overlay.classList.replace('justify-center', 'justify-start'); overlay.classList.add('overflow-y-auto');
+            [menuInicio, menuTienda, menuGameover].forEach(m => m.classList.add('my-auto'));
+            setDificultad('pro');
+            cargar();
+            if (document.fonts) document.fonts.ready.then(() => { campoCache = null; });
+        }
+
+        // Textura del campo (se pre-renderiza una vez)
+        let campoCache = null;
+        function crearCampoCache() {
+            const W = canvas.width, H = canvas.height;
+            const c = document.createElement('canvas'); c.width = W; c.height = H;
+            const g = c.getContext('2d');
+            for (let x = ZONA, i = 0; x < W - ZONA; x += 64, i++) {
+                const gr = g.createLinearGradient(x, 0, x + 64, 0);
+                gr.addColorStop(0, i % 2 ? '#1b4932' : '#276849'); gr.addColorStop(1, i % 2 ? '#205238' : '#2d7452');
+                g.fillStyle = gr; g.fillRect(x, 0, 64, H);
+            }
+            for (let i = 0; i < 16000; i++) { // briznas de césped
+                const x = ZONA + Math.random() * (W - 2 * ZONA), y = Math.random() * H, l = 2 + Math.random() * 5;
+                g.strokeStyle = Math.random() < 0.5 ? 'rgba(0,0,0,0.16)' : 'rgba(180,240,150,0.14)';
+                g.beginPath(); g.moveTo(x, y); g.lineTo(x + (Math.random() - 0.5) * 3, y - l); g.stroke();
+            }
+            for (let i = 0; i < 30; i++) { // zonas de barro
+                const x = ZONA + Math.random() * (W - 2 * ZONA), y = Math.random() * H, r = 14 + Math.random() * 26;
+                const m = g.createRadialGradient(x, y, 0, x, y, r);
+                m.addColorStop(0, 'rgba(96,72,40,0.3)'); m.addColorStop(1, 'rgba(96,72,40,0)');
+                g.fillStyle = m; g.fillRect(x - r, y - r, r * 2, r * 2);
+            }
+            for (const [zx, c1, c2, txt, sg] of [[0, '#7f1d1d', '#a52a2a', 'DEFENSA', -1], [W - ZONA, '#172e78', '#2350b8', 'ANOTA AQUÍ', 1]]) {
+                const zg = g.createLinearGradient(zx, 0, zx + ZONA, 0); zg.addColorStop(0, c1); zg.addColorStop(1, c2);
+                g.fillStyle = zg; g.fillRect(zx, 0, ZONA, H);
+                g.save(); g.beginPath(); g.rect(zx, 0, ZONA, H); g.clip();
+                g.strokeStyle = 'rgba(255,255,255,0.07)'; g.lineWidth = 6;
+                for (let k = -H; k < ZONA + H; k += 14) { g.beginPath(); g.moveTo(zx + k, 0); g.lineTo(zx + k + H, H); g.stroke(); }
+                g.restore();
+                g.save(); g.translate(zx + ZONA / 2, H / 2); g.rotate(sg * Math.PI / 2);
+                g.font = '700 42px Teko, Impact, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+                g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillText(txt, 0, 0); g.restore();
+            }
+            g.strokeStyle = 'rgba(255,255,255,0.6)'; g.lineWidth = 3;
+            for (let x = ZONA; x <= W - ZONA; x += 64) {
+                g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke();
+                if (x > ZONA && x < W - ZONA) {
+                    g.fillStyle = 'rgba(255,255,255,0.28)'; g.font = 'bold 18px Teko, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+                    g.fillText(Math.round((x - ZONA) / 3), x, 56); g.fillText(Math.round((x - ZONA) / 3), x, H - 44);
+                    g.lineWidth = 1.5; g.beginPath();
+                    for (let hx = x + 16; hx < x + 64 && hx < W - ZONA; hx += 16) {
+                        g.moveTo(hx, 170); g.lineTo(hx, 179); g.moveTo(hx, H - 179); g.lineTo(hx, H - 170);
+                    }
+                    g.stroke(); g.lineWidth = 3;
+                }
+            }
+            // ANGUEL estampado en el césped (pintura desgastada)
+            const t = document.createElement('canvas'); t.width = 560; t.height = 200;
+            const q = t.getContext('2d');
+            q.font = '700 140px Teko, Impact, sans-serif'; q.textAlign = 'center'; q.textBaseline = 'middle'; q.lineJoin = 'round';
+            q.lineWidth = 16; q.strokeStyle = '#0b2a1b'; q.strokeText('ANGUEL', 280, 104);
+            q.fillStyle = '#f6f4ec'; q.fillText('ANGUEL', 280, 100);
+            q.globalCompositeOperation = 'destination-out';
+            for (let i = 0; i < 2200; i++) { q.globalAlpha = 0.3 + Math.random() * 0.4; q.beginPath(); q.arc(Math.random() * 560, Math.random() * 200, 0.4 + Math.random() * 1.6, 0, Math.PI * 2); q.fill(); }
+            g.save(); g.translate(W / 2, H / 2);
+            g.strokeStyle = 'rgba(255,255,255,0.45)'; g.lineWidth = 4;
+            g.beginPath(); g.ellipse(0, 0, 250, 98, 0, 0, Math.PI * 2); g.stroke();
+            g.lineWidth = 1.5; g.beginPath(); g.ellipse(0, 0, 238, 88, 0, 0, Math.PI * 2); g.stroke();
+            g.shadowColor = 'rgba(0,0,0,0.5)'; g.shadowBlur = 6; g.shadowOffsetY = 4;
+            g.globalAlpha = 0.94; g.drawImage(t, -280, -100);
+            g.restore();
+            return c;
+        }
+
+        function crearDefensa(x, y) {
+            const pool = TIPOS_DEFENSA.slice(0, Math.min(TIPOS_DEFENSA.length, dif.tipos + nivel));
+            const t = pool[Math.floor(Math.random() * pool.length)];
+            const extra = nivel >= 5 ? 1.1 : 1;
+            defensas.push({
+                x, y, r: t.r || 12,
+                vel: Math.min((t.vel + nivel * 0.2) * (0.8 + Math.random() * 0.4) * extra * dif.vel, 3.4 * dif.vel),
+                agresividad: t.agrasividad, predice: !!t.predice || !!dif.predice, tipo: t.nombre,
+                colorCasco: t.colorCasco, colorCamisa: t.colorCamisa,
+                dir: -1, fase: Math.random() * 6, numero: 20 + Math.floor(Math.random() * 79)
+            });
+        }
+
+        // Ambiente: audio (multitud + efectos), hinchada y lluvia
+        let audio = null, master = null, ruido = null, bufRuido = null, mudo = false, pasoM = 0, proxM = 0;
+        function iniciarAudio() {
+            if (audio) return;
+            try {
+                audio = new (window.AudioContext || window.webkitAudioContext)();
+                master = audio.createGain(); master.gain.value = mudo ? 0 : 0.9;
+                const comp = audio.createDynamicsCompressor(); master.connect(comp); comp.connect(audio.destination);
+                bufRuido = audio.createBuffer(1, audio.sampleRate * 2, audio.sampleRate);
+                const d = bufRuido.getChannelData(0);
+                for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+                const src = audio.createBufferSource(); src.buffer = bufRuido; src.loop = true;
+                const f = audio.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 700; f.Q.value = 0.6;
+                const lfo = audio.createOscillator(); lfo.frequency.value = 0.2;
+                const lg = audio.createGain(); lg.gain.value = 250; lfo.connect(lg); lg.connect(f.frequency);
+                ruido = audio.createGain(); ruido.gain.value = 0.05;
+                src.connect(f); f.connect(ruido); ruido.connect(master);
+                src.start(); lfo.start(); proxM = audio.currentTime + 0.1;
+            } catch (e) { audio = null; }
+        }
+        function tono(f, t, dur, tipo, vol, fin) {
+            const o = audio.createOscillator(), g = audio.createGain();
+            o.type = tipo; o.frequency.setValueAtTime(f, t);
+            if (fin) o.frequency.exponentialRampToValueAtTime(fin, t + dur);
+            g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+            o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.02);
+        }
+        function sonido(f1, f2, dur, tipo = 'square', vol = 0.12) {
+            if (!audio || mudo) return;
+            const t = audio.currentTime;
+            tono(f1, t, dur, tipo, vol, f2); tono(f1 * 1.005, t, dur, tipo, vol * 0.6, f2 * 1.005);
+        }
+        function rafaga(dur, freq, vol, tipo, t) {
+            const s = audio.createBufferSource(); s.buffer = bufRuido;
+            const f = audio.createBiquadFilter(); f.type = tipo; f.frequency.value = freq;
+            const g = audio.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+            s.connect(f); f.connect(g); g.connect(master); s.start(t, Math.random()); s.stop(t + dur);
+        }
+        function sfxGolpe() {
+            if (!audio || mudo) return;
+            const t = audio.currentTime;
+            rafaga(0.25, 900, 0.5, 'lowpass', t); tono(110, t, 0.3, 'sine', 0.5, 35); tono(60, t, 0.15, 'square', 0.1, 30);
+        }
+        function sfxPaso() { if (audio && !mudo) rafaga(0.05, 1800, 0.05, 'highpass', audio.currentTime); }
+        function sfxSilbato() {
+            if (!audio || mudo) return;
+            const t = audio.currentTime; tono(2800, t, 0.18, 'sine', 0.1); tono(3000, t + 0.2, 0.3, 'sine', 0.1);
+        }
+        function fanfarria() {
+            if (!audio || mudo) return;
+            const t = audio.currentTime;
+            [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => { tono(f, t + i * 0.14, 0.3, 'square', 0.07); tono(f / 2, t + i * 0.14, 0.3, 'triangle', 0.12); });
+            rafaga(1.4, 2500, 0.15, 'lowpass', t);
+        }
+        function ovacion() {
+            if (!ruido || mudo) return;
+            const t = audio.currentTime;
+            ruido.gain.cancelScheduledValues(t); ruido.gain.setTargetAtTime(0.25, t, 0.08); ruido.gain.setTargetAtTime(0.05, t + 2.5, 0.6);
+        }
+        function programarMusica() { // secuenciador: bombo, caja, hi-hat, bajo y arpegio que se acelera con el nivel
+            if (!audio || mudo) return;
+            if (estadoJuego !== 'jugando') { proxM = Math.max(proxM, audio.currentTime); return; }
+            const dur = 60 / (105 + nivel * 7 + (dif.vel > 1 ? 8 : 0)) / 4;
+            while (proxM < audio.currentTime + 0.15) {
+                const i = pasoM % 16, raiz = [55, 55, 65.41, 73.42][Math.floor(pasoM / 16) % 4];
+                if (i % 4 === 0) tono(150, proxM, 0.15, 'sine', 0.28, 40);
+                if (i % 4 === 2) rafaga(0.04, 7000, 0.05, 'highpass', proxM);
+                if (i === 4 || i === 12) rafaga(0.12, 1800, 0.12, 'bandpass', proxM);
+                if (i % 2 === 0) tono(raiz, proxM, dur * 1.8, 'triangle', 0.2);
+                if (nivel >= 2 && i % 2 === 1) tono(raiz * 4 * [1, 1.5, 2, 1.5][(i >> 1) % 4], proxM, dur * 1.5, 'square', 0.03);
+                if (nivel >= 4 && i % 4 === 0) tono(raiz * 8, proxM, dur * 3, 'sawtooth', 0.025);
+                proxM += dur; pasoM++;
+            }
+        }
+        function alternarMudo() {
+            mudo = !mudo;
+            if (master) master.gain.value = mudo ? 0 : 0.9;
+            crearTextoFlotante(mudo ? '🔇 Sonido apagado (M)' : '🔊 Sonido activo (M)', canvas.width / 2, 120, '#e5e7eb');
+        }
+
+        function actualizarEfectos() {
+            for (let i = particulas.length - 1; i >= 0; i--) {
+                const p = particulas[i]; p.x += p.vx; p.y += p.vy; p.vy += p.g || 0;
+                if (--p.vida <= 0) particulas.splice(i, 1);
+            }
+            for (let i = textosFlotantes.length - 1; i >= 0; i--) {
+                const tf = textosFlotantes[i]; tf.y += tf.vy;
+                if (--tf.vida <= 0) textosFlotantes.splice(i, 1);
+            }
+        }
+        function lanzarFuego() {
+            const x = 150 + Math.random() * 700, y = 70 + Math.random() * 180;
+            const col = ['#fde047', '#f87171', '#60a5fa', '#4ade80', '#f0abfc'][Math.floor(Math.random() * 5)];
+            for (let i = 0; i < 36; i++) {
+                const an = i / 36 * Math.PI * 2, v = 1 + Math.random() * 3;
+                particulas.push({ x, y, vx: Math.cos(an) * v, vy: Math.sin(an) * v, color: col, vida: 34, r: 3, g: 0.06 });
+            }
+            sonido(900, 200, 0.35, 'triangle', 0.06);
+        }
+        function actualizarCelebracion() {
+            tiempo++; celeb--;
+            if (celeb % 22 === 0) lanzarFuego();
+            jugador.y = jugador.y0 - Math.abs(Math.sin(celeb * 0.25)) * 26;
+            jugador.dir = Math.floor(celeb / 18) % 2 ? 1 : -1; jugador.moviendo = true;
+            for (const c of confeti) { c.x += c.vx + Math.sin(c.y * 0.05) * 0.8; c.y += c.vy; c.rot += c.vr; }
+            confeti = confeti.filter(c => c.y < canvas.height + 20);
+            actualizarEfectos();
+            if (celeb <= 0) { estadoJuego = 'tienda'; jugador.y = jugador.y0; abrirTienda('td'); }
+        }
+        function dibujarEfectos() {
+            const W = canvas.width, H = canvas.height;
+            if (lentoT > 0) { ctx.fillStyle = 'rgba(34,211,238,0.10)'; ctx.fillRect(0, 0, W, H); }
+            if (jugador && jugador.caida > 0) {
+                ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#fde047';
+                for (let i = 0; i < 3; i++) { const an = tiempo * 0.15 + i * 2.1; ctx.fillText('★', jugador.x + Math.cos(an) * 16, jugador.y - 28 + Math.sin(an) * 5); }
+            }
+            for (const c of confeti) { ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.rot); ctx.fillStyle = c.color; ctx.fillRect(-c.w / 2, -2, c.w, 4); ctx.restore(); }
+            ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round';
+            if (estadoJuego === 'jugando' && jugador) {
+                const pr = Math.max(0, Math.min(1, (jugador.x - ZONA) / (W - 2 * ZONA)));
+                ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(W / 2 - 120, 30, 240, 6);
+                ctx.fillStyle = '#f59e0b'; ctx.fillRect(W / 2 - 120, 30, 240 * pr, 6);
+                if (lentoT > 0) { ctx.font = '600 20px Teko, sans-serif'; ctx.fillStyle = '#67e8f9'; ctx.fillText('⏳ TIEMPO LENTO', W / 2, 100); }
+            }
+            if (combo > 1) {
+                ctx.font = '700 36px Teko, sans-serif'; ctx.lineWidth = 4; ctx.strokeStyle = '#000'; ctx.fillStyle = '#fde047';
+                ctx.strokeText(`COMBO x${combo}`, W / 2, 70); ctx.fillText(`COMBO x${combo}`, W / 2, 70);
+            }
+            if (estadoJuego === 'celebracion') {
+                const k = Math.min(1, (200 - celeb) / 15), sc = 0.6 + 0.4 * k + Math.sin(tiempo * 0.2) * 0.04;
+                ctx.save(); ctx.translate(W / 2, H * 0.3); ctx.scale(sc, sc); ctx.rotate(Math.sin(tiempo * 0.1) * 0.03);
+                ctx.font = '700 130px Teko, Impact, sans-serif'; ctx.lineWidth = 12; ctx.strokeStyle = '#7c2d12';
+                ctx.strokeText('¡TOUCHDOWN!', 0, 0);
+                const gg = ctx.createLinearGradient(0, -90, 0, 20); gg.addColorStop(0, '#fef08a'); gg.addColorStop(1, '#f97316');
+                ctx.fillStyle = gg; ctx.fillText('¡TOUCHDOWN!', 0, 0);
+                ctx.restore();
+            }
+            if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash / 12})`; ctx.fillRect(0, 0, W, H); flash--; }
+        }
+
+        const HINCHAS = Array.from({ length: 140 }, (_, i) => ({
+            x: i * 7.2 + Math.random() * 3, f: Math.random() * 6,
+            c: ['#ef4444', '#f59e0b', '#e2e8f0', '#3b82f6', '#a855f7'][i % 5]
+        }));
+        const gotas = Array.from({ length: 110 }, () => ({ x: Math.random() * 1000, y: Math.random() * 500, v: 9 + Math.random() * 6 }));
+
+        window.addEventListener('keydown', (e) => {
+            const k = e.key.toLowerCase();
+            teclas[k] = true;
+            if (k === 'm') alternarMudo();
+            if (e.key.startsWith('Arrow') || k === ' ' || k === 'shift') e.preventDefault();
+            
+            if (k === 'f' && estadoJuego === 'jugando') {
+                intentarFinta();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            teclas[e.key.toLowerCase()] = false;
+        });
+
+        function ajustarCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = 1000;
+            canvas.height = 500;
+        }
+        window.addEventListener('resize', ajustarCanvas);
+        ajustarCanvas();
+
+        function iniciarJuego() {
+            iniciarAudio();
+            puntos = 0; nivel = 1;
+            vidas = dif.vidas + mejoras.vida.nivel - 1;
+            jugador.estaminaMax = 100 + (mejoras.turbo.nivel - 1) * 25;
+            empezarDrive();
+        }
+
+        function empezarDrive() {
+            jugador.x = ZONA + 30;
+            jugador.y = canvas.height / 2;
+            jugador.estamina = jugador.estaminaMax;
+            jugador.fintaCd = 0;
+            jugador.escudo = false;
+            jugador.invulnerable = 60; // 1s invulnerable al inicio
+            jugador.caida = 0; combo = 0; lentoT = 0; confeti = []; sfxSilbato();
+
+            defensas = [];
+            coleccionables = [];
+
+            // Generar defensas según nivel
+            const numDef = Math.min(Math.round((7 + nivel * 2) * dif.cant), 32);
+            for (let i = 0; i < numDef; i++) {
+                crearDefensa(350 + Math.random() * (canvas.width - ZONA - 400), 40 + Math.random() * (canvas.height - 80));
+            }
+
+            // Generar coleccionables en el campo
+            const numCol = 1 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < numCol; i++) {
+                const tObj = TIPOS_COLECCIONABLE[Math.floor(Math.random() * TIPOS_COLECCIONABLE.length)];
+                coleccionables.push({
+                    x: ZONA + 100 + Math.random() * (canvas.width - ZONA * 2 - 150),
+                    y: 60 + Math.random() * (canvas.height - 120),
+                    r: 12,
+                    tipo: tObj.tipo,
+                    simbolo: tObj.simbolo,
+                    color: tObj.color,
+                    valor: tObj.valor,
+                    fase: Math.random() * 10
+                });
+            }
+
+            estadoJuego = 'jugando';
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            menuInicio.classList.add('hidden');
+            menuTienda.classList.add('hidden');
+            menuGameover.classList.add('hidden');
+            actualizarUI();
+        }
+
+        function actualizarUI() {
+            puntosEl.textContent = puntos;
+            vidasEl.textContent = '❤️'.repeat(Math.max(0, vidas));
+            nivelEl.textContent = nivel;
+            oroEl.textContent = `🪙 ${oro}`;
+
+            // Estamina
+            const pct = Math.round((jugador.estamina / jugador.estaminaMax) * 100);
+            barraEstamina.style.width = pct + '%';
+            txtEstamina.textContent = pct + '%';
+
+            // Finta
+            if (jugador.fintaCd <= 0) {
+                estadoFintaEl.textContent = '¡LISTA (F)!';
+                estadoFintaEl.className = 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs px-2.5 py-1 rounded-lg font-bold animate-pulse';
+            } else {
+                const seg = (jugador.fintaCd / 60).toFixed(1);
+                estadoFintaEl.textContent = `RECARGANDO (${seg}s)`;
+                estadoFintaEl.className = 'bg-zinc-800 text-zinc-400 border border-zinc-700 text-xs px-2.5 py-1 rounded-lg font-bold';
+            }
+
+            // Buffs
+            if (jugador.escudo) {
+                estadoBuffsEl.textContent = '🛡️ Escudo Activo (Protegido)';
+                estadoBuffsEl.className = 'text-purple-400 font-bold';
+            } else {
+                estadoBuffsEl.textContent = '🛡️ Escudo: Inactivo';
+                estadoBuffsEl.className = 'text-zinc-400';
+            }
+        }
+
+        function intentarFinta() {
+            if (jugador.fintaCd <= 0 && jugador.estamina >= 25) {
+                jugador.fintaCd = Math.max(40, 120 - (mejoras.finta.nivel - 1) * 15);
+                jugador.estamina -= 25;
+                jugador.fintando = true;
+                jugador.fintaDuracion = 22; // frames de esquive total
+                jugador.invulnerable = 25;
+                crearTextoFlotante('¡FINTA / GIRO!', jugador.x, jugador.y - 20, '#06b6d4');
+                sonido(300, 800, 0.15, 'triangle');
+                
+                // Efecto partículas finta
+                for (let i = 0; i < 12; i++) {
+                    particulas.push({
+                        x: jugador.x, y: jugador.y,
+                        vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+                        color: '#06b6d4', vida: 25, r: 4
+                    });
+                }
+            }
+        }
+
+        function crearTextoFlotante(texto, x, y, color) {
+            textosFlotantes.push({ texto, x, y, color, vida: 45, vy: -1.2 });
+        }
+
+        function actualizar() {
+            if (estadoJuego !== 'jugando') return;
+            tiempo++;
+            if (jugador.caida > 0) { jugador.caida--; actualizarEfectos(); if (jugador.caida === 0) finCaida(); return; }
+
+            if (jugador.invulnerable > 0) jugador.invulnerable--;
+            if (comboT > 0 && --comboT === 0) combo = 0;
+            if (lentoT > 0) lentoT--;
+            if (nivel >= 2 && tiempo % Math.max(150, Math.round((480 - nivel * 40) / dif.vel)) === 0) {
+                crearDefensa(canvas.width - ZONA, 40 + Math.random() * (canvas.height - 80));
+                crearTextoFlotante('¡BLITZ!', canvas.width - 140, 60, '#ef4444');
+                sonido(120, 60, 0.3, 'sawtooth');
+            }
+            if (jugador.fintaCd > 0) jugador.fintaCd--;
+
+            if (jugador.fintando) {
+                jugador.fintaDuracion--;
+                if (jugador.fintaDuracion <= 0) jugador.fintando = false;
+            }
+
+            // Controles de jugador
+            let dx = 0, dy = 0;
+            if (teclas['arrowleft'] || teclas['a']) dx -= 1;
+            if (teclas['arrowright'] || teclas['d']) dx += 1;
+            if (teclas['arrowup'] || teclas['w']) dy -= 1;
+            if (teclas['arrowdown'] || teclas['s']) dy += 1;
+            if (dx && dy) { dx *= 0.707; dy *= 0.707; }
+
+            const usandoTurbo = (teclas['shift'] || teclas[' ']) && jugador.estamina > 5 && (dx !== 0 || dy !== 0);
+            
+            let velocidadActual = jugador.velBase + (mejoras.velocidad.nivel - 1) * 0.35;
+            if (usandoTurbo) {
+                velocidadActual *= jugador.velTurboMult;
+                jugador.estamina = Math.max(0, jugador.estamina - 0.8);
+                // Partículas de turbo
+                if (tiempo % 2 === 0) {
+                    particulas.push({
+                        x: jugador.x - jugador.dir * 10, y: jugador.y,
+                        vx: -jugador.dir * 2 + (Math.random() - 0.5), vy: (Math.random() - 0.5) * 1,
+                        color: '#f59e0b', vida: 18, r: 3
+                    });
+                }
+            } else {
+                jugador.estamina = Math.min(jugador.estaminaMax, jugador.estamina + 0.28);
+            }
+
+            if (jugador.fintando) velocidadActual *= 1.8;
+            if (nivel >= 3) velocidadActual *= 0.94; // césped mojado
+
+            jugador.moviendo = dx !== 0 || dy !== 0;
+            if (jugador.moviendo && tiempo % (usandoTurbo ? 8 : 13) === 0) sfxPaso();
+            if (jugador.moviendo && tiempo % 4 === 0) particulas.push({ x: jugador.x - jugador.dir * 4, y: jugador.y + 14, vx: Math.random() - 0.5, vy: -Math.random() * 0.4, color: 'rgba(170,150,105,0.5)', vida: 16, r: 3 });
+            if (dx) jugador.dir = dx > 0 ? 1 : -1;
+
+            jugador.x = Math.max(jugador.r, Math.min(canvas.width - jugador.r, jugador.x + dx * velocidadActual));
+            jugador.y = Math.max(jugador.r, Math.min(canvas.height - jugador.r, jugador.y + dy * velocidadActual));
+            jugador.vx = dx * velocidadActual; jugador.vy = dy * velocidadActual;
+
+            // Actualizar Defensas
+            for (const d of defensas) {
+                if (d.caida > 0) { d.caida--; continue; }
+                if (d.esq > 0) d.esq--;
+                const fl = lentoT > 0 ? 0.45 : 1;
+                const lead = d.predice ? 12 + nivel * 2 : 0; // el Interceptor anticipa tu trayectoria
+                const ax = jugador.x + jugador.vx * lead - d.x;
+                const ay = jugador.y + jugador.vy * lead - d.y;
+                const dist = Math.hypot(ax, ay) || 1;
+                const real = Math.hypot(jugador.x - d.x, jugador.y - d.y);
+
+                const vx = (-0.4 + (ax / dist) * d.agresividad) * d.vel * fl;
+                d.x += vx;
+                d.dir = vx >= 0 ? 1 : -1;
+                d.y += (ay / dist) * d.agresividad * d.vel * 1.1 * fl;
+                // se separan entre sí para cubrir más campo
+                for (const o of defensas) {
+                    if (o === d) continue;
+                    const sx = d.x - o.x, sy = d.y - o.y, sd = Math.hypot(sx, sy);
+                    if (sd > 0 && sd < 24) { d.x += sx / sd * 0.5; d.y += sy / sd * 0.5; }
+                }
+                d.y = Math.max(d.r, Math.min(canvas.height - d.r, d.y));
+
+                // Colisión con el jugador
+                if (real < jugador.r + d.r) {
+                    if (jugador.fintando) {
+                        // Esquive exitoso por finta
+                        if (!(d.esq > 0)) {
+                            d.esq = 40; combo++; comboT = 200; oro += 10 + combo * 2; puntos += combo;
+                            crearTextoFlotante(`¡ESQUIVADO! x${combo}`, jugador.x, jugador.y - 25, '#06b6d4');
+                            sonido(700, 1400, 0.1, 'triangle', 0.08);
+                        }
+                    } else if (usandoTurbo && d.r <= 12 && jugador.estamina > 30) {
+                        d.caida = d.caidaIni = 90; jugador.estamina -= 15; combo++; comboT = 200; puntos += 2 + combo; shake = 8;
+                        crearTextoFlotante('¡ARROLLADO!', d.x, d.y - 25, '#f59e0b'); sfxGolpe();
+                        for (let i = 0; i < 10; i++) particulas.push({ x: d.x, y: d.y + 8, vx: (Math.random() - 0.5) * 5, vy: -Math.random() * 3, color: '#3f8f4f', vida: 24, r: 3, g: 0.15 });
+                    } else if (jugador.invulnerable > 0) {
+                        // Ignorar placaje por invulnerabilidad
+                    } else if (jugador.escudo) {
+                        jugador.escudo = false;
+                        crearTextoFlotante('¡ESCUDO ROMPIÓ PLAQUE!', jugador.x, jugador.y - 25, '#a855f7');
+                        jugador.invulnerable = 60;
+                    } else {
+                        return placajeJugador();
+                    }
+                }
+            }
+
+            // Recoger coleccionables
+            for (let i = coleccionables.length - 1; i >= 0; i--) {
+                const c = coleccionables[i];
+                const distCol = Math.hypot(jugador.x - c.x, jugador.y - c.y);
+                if (distCol < jugador.r + c.r + 5) {
+                    if (c.tipo === 'oro') {
+                        oro += c.valor;
+                        crearTextoFlotante(`+${c.valor} 🪙`, c.x, c.y - 15, '#eab308');
+                    } else if (c.tipo === 'turbo') {
+                        jugador.estamina = jugador.estaminaMax;
+                        crearTextoFlotante('¡ESTAMINA LLENA!', c.x, c.y - 15, '#06b6d4');
+                    } else if (c.tipo === 'lento') {
+                        lentoT = 300; crearTextoFlotante('⏳ ¡TIEMPO LENTO!', c.x, c.y - 15, '#22d3ee'); sonido(900, 200, 0.4, 'sine', 0.1);
+                    } else if (c.tipo === 'escudo') {
+                        jugador.escudo = true;
+                        crearTextoFlotante('🛡️ ¡ESCUDO ACTIVO!', c.x, c.y - 15, '#a855f7');
+                    }
+                    sonido(880, 1320, 0.12, 'sine'); setTimeout(() => sonido(1320, 1760, 0.15, 'sine'), 70);
+                    coleccionables.splice(i, 1);
+                }
+            }
+
+            // Touchdown
+            if (jugador.x > canvas.width - ZONA) {
+                touchdownConseguido();
+            }
+
+            // Actualizar partículas
+            for (let i = particulas.length - 1; i >= 0; i--) {
+                const p = particulas[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vida--;
+                if (p.vida <= 0) particulas.splice(i, 1);
+            }
+
+            // Actualizar textos flotantes
+            for (let i = textosFlotantes.length - 1; i >= 0; i--) {
+                const tf = textosFlotantes[i];
+                tf.y += tf.vy;
+                tf.vida--;
+                if (tf.vida <= 0) textosFlotantes.splice(i, 1);
+            }
+
+            actualizarUI();
+        }
+
+        function touchdownConseguido() {
+            puntos += 7 * nivel; oro += Math.round(50 * nivel * dif.oro); guardar();
+            estadoJuego = 'celebracion'; celeb = 200; shake = 10;
+            jugador.y0 = jugador.y; jugador.invulnerable = 0; jugador.fintando = false;
+            ovacion(); fanfarria();
+            confeti = Array.from({ length: 150 }, () => ({
+                x: Math.random() * canvas.width, y: -Math.random() * 250, vx: (Math.random() - 0.5) * 2, vy: 1.5 + Math.random() * 2.5,
+                rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, w: 6 + Math.random() * 6,
+                color: ['#fde047', '#f87171', '#60a5fa', '#4ade80', '#f0abfc', '#fff'][Math.floor(Math.random() * 6)]
+            }));
+            actualizarUI();
+        }
+
+        function siguienteNivel() {
+            nivel++;
+            empezarDrive();
+        }
+
+        function comprarMejora(tipo) {
+            const m = mejoras[tipo], sub = document.getElementById('tienda-sub');
+            if (tipo === 'vida' && m.nivel >= 4) { sub.textContent = 'Ya tienes el máximo de vidas extra.'; return; }
+            if (oro < m.costo) { sub.textContent = '¡Te falta oro! 🪙'; return; }
+            oro -= m.costo; m.nivel++; m.costo = Math.round(m.costo * 1.6);
+            if (tipo === 'turbo') { jugador.estaminaMax = 100 + (m.nivel - 1) * 25; jugador.estamina = jugador.estaminaMax; }
+            sonido(500, 900, 0.12, 'sine'); guardar(); refrescarTienda(); actualizarUI();
+        }
+
+        function placajeJugador() {
+            vidas--; combo = 0; actualizarUI();
+            jugador.caida = jugador.caidaIni = 70; jugador.invulnerable = 0; jugador.fintando = false; jugador.moviendo = false;
+            shake = 16; flash = 6; sfxGolpe();
+            for (let i = 0; i < 26; i++) particulas.push({ x: jugador.x, y: jugador.y + 8, vx: (Math.random() - 0.5) * 7, vy: -Math.random() * 4, color: i % 3 ? '#3f8f4f' : '#f5f5f4', vida: 30, r: 3, g: 0.18 });
+            crearTextoFlotante(vidas > 0 ? '¡PLACADO! -1 VIDA' : '¡FIN DEL DRIVE!', jugador.x, jugador.y - 30, '#ef4444');
+        }
+
+        function finCaida() {
+            if (vidas <= 0) {
+                estadoJuego = 'fin'; guardar();
+                document.getElementById('gameover-texto').textContent = `Has conseguido un total de ${puntos} puntos en el partido. ¡Gran esfuerzo!`;
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                menuInicio.classList.add('hidden'); menuTienda.classList.add('hidden'); menuGameover.classList.remove('hidden');
+            } else {
+                jugador.x = ZONA + 30; jugador.y = canvas.height / 2; jugador.invulnerable = 90;
+                for (const d of defensas) if (Math.hypot(d.x - jugador.x, d.y - jugador.y) < 160) d.x += 200;
+                sfxSilbato();
+            }
+        }
+
+        function dibujarCampo() {
+            const W = canvas.width, H = canvas.height;
+            if (!campoCache) campoCache = crearCampoCache();
+            ctx.drawImage(campoCache, 0, 0);
+            // hinchada animada arriba y abajo
+            for (const [y0, sg] of [[0, 1], [H, -1]]) {
+                ctx.fillStyle = '#0b1210';
+                ctx.fillRect(0, sg > 0 ? 0 : H - 24, W, 24);
+                for (const h of HINCHAS) {
+                    ctx.fillStyle = h.c;
+                    ctx.beginPath();
+                    ctx.arc(h.x, y0 + sg * (12 + Math.sin(tiempo * (estadoJuego === 'celebracion' ? 0.5 : 0.15) + h.f) * (estadoJuego === 'celebracion' ? 7 : 2.5)), 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            // viñeta de estadio
+            const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.65);
+            vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.45)');
+            ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+        }
+
+        function dibujarClima() {
+            const W = canvas.width, H = canvas.height;
+            if (nivel >= 5) {
+                ctx.fillStyle = 'rgba(4,8,28,0.4)'; ctx.fillRect(0, 0, W, H);
+                if (jugador) {
+                    const g = ctx.createRadialGradient(jugador.x, jugador.y, 10, jugador.x, jugador.y, 170);
+                    g.addColorStop(0, 'rgba(255,240,200,0.28)'); g.addColorStop(1, 'rgba(255,240,200,0)');
+                    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+                }
+            }
+            if (nivel >= 3) {
+                ctx.strokeStyle = 'rgba(180,200,255,0.4)'; ctx.lineWidth = 1; ctx.beginPath();
+                for (const d of gotas) {
+                    d.y += d.v; d.x -= 2;
+                    if (d.y > H) { d.y = -10; d.x = Math.random() * W + 20; }
+                    ctx.moveTo(d.x, d.y); ctx.lineTo(d.x + 2, d.y - 10);
+                }
+                ctx.stroke();
+            }
+            ctx.fillStyle = 'rgba(255,255,255,0.55)';
+            ctx.font = '600 16px Teko, sans-serif';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+            ctx.fillText(nivel >= 5 ? '🌙 NOCHE' : nivel >= 3 ? '🌧 LLUVIA' : '☀ DÍA', ZONA + 10, 44);
+        }
+
+        function dibujarAtleta(p, e, numero, conBalon) {
+            const esc = (p.r || 12) / 12;
+            const paso = p.moviendo === false || p.caida > 0 ? 0 : Math.sin(tiempo * 0.4 + (p.fase || 0));
+            const bob = -Math.abs(paso) * 2.2;
+            const dir = p.dir || 1;
+            const acento = e.acento || e.casco, media = e.media || e.casco;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.scale(esc, esc);
+            if (p.caida > 0) { const k = Math.min(1, ((p.caidaIni || 70) - p.caida) / 10); ctx.rotate(dir * k * Math.PI / 2); ctx.translate(0, k * 6); }
+            ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+
+            // sombra
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.beginPath(); ctx.ellipse(0, 16, 13, 5, 0, 0, Math.PI * 2); ctx.fill();
+
+            // piernas: pantalón, media y botín
+            for (const lado of [-1, 1]) {
+                const lx = lado * 4, ly = 6 + paso * 2.5 * lado;
+                ctx.fillStyle = e.pantalon; ctx.fillRect(lx - 2.5, ly, 5, 5);
+                ctx.fillStyle = acento; ctx.fillRect(lx - 0.4, ly, 0.8, 5);
+                ctx.fillStyle = media; ctx.fillRect(lx - 2, ly + 5, 4, 4);
+                ctx.fillStyle = '#fff'; ctx.fillRect(lx - 2, ly + 6.2, 4, 0.9);
+                ctx.fillStyle = '#0f0f10';
+                ctx.beginPath(); ctx.roundRect(lx - 2.5 + dir, ly + 8.5, 6, 3.2, 1.5); ctx.fill();
+            }
+
+            // brazo trasero
+            const sw = conBalon ? 0 : paso * 5;
+            ctx.strokeStyle = e.camisa; ctx.lineWidth = 4.5;
+            ctx.beginPath(); ctx.moveTo(0, -7 + bob); ctx.lineTo(-dir * (4 + sw), 2 + bob); ctx.stroke();
+            ctx.fillStyle = acento; ctx.strokeStyle = 'rgba(0,0,0,0.7)'; ctx.lineWidth = 0.8;
+            ctx.beginPath(); ctx.arc(-dir * (4 + sw), 3 + bob, 2.2, 0, Math.PI * 2); ctx.fill();
+
+            // torso con degradado, franja y hombreras
+            ctx.beginPath(); ctx.roundRect(-9, -11 + bob, 18, 19, 5);
+            ctx.fillStyle = e.camisa; ctx.fill();
+            const tg = ctx.createLinearGradient(-9, 0, 9, 0);
+            tg.addColorStop(0, 'rgba(255,255,255,0.2)'); tg.addColorStop(1, 'rgba(0,0,0,0.3)');
+            ctx.fillStyle = tg; ctx.fill();
+            ctx.fillStyle = acento; ctx.fillRect(-9, 4 + bob, 18, 2.5);
+            ctx.save(); ctx.beginPath(); ctx.roundRect(-9, -11 + bob, 18, 19, 5); ctx.clip();
+            ctx.strokeStyle = 'rgba(0,0,0,0.13)'; ctx.lineWidth = 0.6;
+            for (let y = -10; y < 8; y += 2) { ctx.beginPath(); ctx.moveTo(-9, y + bob); ctx.lineTo(9, y + bob); ctx.stroke(); }
+            ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillRect(-9, -5 + bob, 18, 1.2); ctx.restore();
+            ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.roundRect(-9, -11 + bob, 18, 19, 5); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(0, -10 + bob, 12.5, 4.8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = e.camisa; ctx.fill(); ctx.fillStyle = tg; ctx.fill(); ctx.stroke();
+
+            // número con contorno
+            ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+            ctx.strokeText(numero, 0, 0 + bob);
+            ctx.fillStyle = e.numeroColor || '#fff'; ctx.fillText(numero, 0, 0 + bob);
+
+            // brazo delantero (con balón o corriendo)
+            ctx.strokeStyle = e.camisa; ctx.lineWidth = 4.5;
+            const hx = conBalon ? dir * 7 : dir * (4 - sw), hy = conBalon ? -1 : 2;
+            ctx.beginPath(); ctx.moveTo(0, -7 + bob); ctx.lineTo(hx, hy + bob); ctx.stroke();
+            ctx.fillStyle = acento; ctx.strokeStyle = 'rgba(0,0,0,0.7)'; ctx.lineWidth = 0.8;
+            ctx.beginPath(); ctx.arc(hx, hy + 1 + bob, 2.2, 0, Math.PI * 2); ctx.fill();
+
+            // casco: brillo, franja y facemask
+            const cx = dir * 1.5, cy = -17 + bob;
+            ctx.fillStyle = e.casco; ctx.beginPath(); ctx.arc(cx, cy, 7.5, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = acento; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(cx, cy, 7.5, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+            ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(cx, cy, 7.5, 0, Math.PI * 2); ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(cx - dir * 2, cy - 2, 4.5, Math.PI * 1.1, Math.PI * 1.5); ctx.stroke();
+            ctx.fillStyle = 'rgba(20,30,50,0.55)'; ctx.beginPath(); ctx.ellipse(cx + dir * 4.5, cy - 0.5, 2.8, 2, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = acento; ctx.beginPath(); ctx.arc(cx - dir, cy + 1, 1.6, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1.3;
+            ctx.beginPath();
+            ctx.moveTo(cx + dir * 4, cy - 2); ctx.lineTo(cx + dir * 9, cy - 1);
+            ctx.lineTo(cx + dir * 8, cy + 4); ctx.lineTo(cx + dir * 3, cy + 4);
+            ctx.moveTo(cx + dir * 4, cy + 1); ctx.lineTo(cx + dir * 8.5, cy + 1.5);
+            ctx.stroke();
+
+            // balón con cordones
+            if (conBalon) {
+                const bg = ctx.createLinearGradient(0, -6, 0, 3);
+                bg.addColorStop(0, '#b45309'); bg.addColorStop(1, '#6b3410');
+                ctx.save(); ctx.translate(dir * 10, -1 + bob); ctx.rotate(dir * 0.3);
+                ctx.fillStyle = bg; ctx.beginPath(); ctx.ellipse(0, 0, 7.5, 4.2, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(-2.5, 0); ctx.lineTo(2.5, 0);
+                for (let k = -2; k <= 2; k += 2) { ctx.moveTo(k, -1.5); ctx.lineTo(k, 1.5); }
+                ctx.stroke(); ctx.restore();
+            }
+            ctx.restore();
+        }
+
+        function dibujarColeccionables() {
+            for (const c of coleccionables) {
+                const flotacion = Math.sin(tiempo * 0.1 + c.fase) * 4;
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(c.x, c.y + 14, 10, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = c.color;
+                ctx.beginPath();
+                ctx.arc(c.x, c.y + flotacion, c.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.font = '14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(c.simbolo, c.x, c.y + flotacion);
+            }
+        }
+
+        function dibujarParticulas() {
+            for (const p of particulas) {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r * (p.vida / 20), 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function dibujarTextosFlotantes() {
+            for (const tf of textosFlotantes) {
+                ctx.fillStyle = tf.color;
+                ctx.font = 'bold 16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(tf.texto, tf.x, tf.y);
+            }
+        }
+
+        function dibujar() {
+            ctx.save();
+            if (shake > 0.3) { ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake); shake *= 0.9; }
+            dibujarCampo();
+            dibujarColeccionables();
+            dibujarParticulas();
+
+            if (estadoJuego === 'jugando' || estadoJuego === 'pausa' || estadoJuego === 'celebracion') {
+                // Ordenar elementos en Y para efecto profundidad 2.5D
+                const todos = defensas.map(d => ({
+                    p: d,
+                    estilo: { camisa: d.colorCamisa, casco: d.colorCasco, pantalon: '#cbd5e1', numeroColor: '#fff' },
+                    n: d.numero,
+                    balon: false
+                }));
+
+                const estiloJugador = {
+                    camisa: '#f59e0b',
+                    casco: '#ffffff',
+                    pantalon: '#1e293b', acento: '#f59e0b', media: '#f59e0b',
+                    numeroColor: '#111'
+                };
+                todos.push({ p: jugador, estilo: estiloJugador, n: 88, balon: true });
+
+                todos.sort((a, b) => a.p.y - b.p.y);
+
+                for (const t of todos) {
+                    // Si el jugador está invulnerable parpadea
+                    if (t.p === jugador && jugador.invulnerable > 0 && Math.floor(tiempo / 4) % 2 === 0) continue;
+                    dibujarAtleta(t.p, t.estilo, t.n, t.balon);
+                }
+
+                // Efecto escudo visual alrededor del jugador
+                if (jugador.escudo) {
+                    ctx.strokeStyle = '#a855f7';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(jugador.x, jugador.y - 3, 22, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // Efecto finta visual
+                if (jugador.fintando) {
+                    ctx.strokeStyle = '#06b6d4';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(jugador.x, jugador.y - 3, 26 + Math.sin(tiempo * 0.8) * 4, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+
+            dibujarEfectos();
+            dibujarClima();
+            dibujarTextosFlotantes();
+            ctx.restore();
+        }
+
+        function buclePrincipal() {
+            programarMusica();
+            if (estadoJuego === 'celebracion') actualizarCelebracion(); else actualizar();
+            dibujar();
+            requestAnimationFrame(buclePrincipal);
+        }
+
+        montarMenus();
+        requestAnimationFrame(buclePrincipal);
+    </script>
+</body>
+</html>
