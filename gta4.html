@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Grand Theft Auto IV · Liberty City</title>
+<meta name="description" content="Ficha, descripción y opinión personal sobre Grand Theft Auto IV, de Rockstar North." />
+
+<!-- Fuentes -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,900;1,9..144,500&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --color-bg: #0a0b0c;
+  --color-card-bg: #141618;
+  --color-text-main: #e0e0e0;
+  --color-text-muted: #a0a0a0;
+  --color-accent: #d9822b;
+  --color-border: #2a2d30;
+  --font-heading: 'Fraunces', serif;
+  --font-body: 'Instrument Sans', sans-serif;
+  --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+.salto {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: var(--color-accent);
+  color: #000;
+  padding: 8px 16px;
+  z-index: 100;
+  text-decoration: none;
+  font-weight: bold;
+  transition: top 0.3s;
+}
+
+.salto:focus {
+  top: 0;
+}
+
+/* HERO / CABECERA */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero__img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  filter: brightness(0.35) contrast(1.1);
+}
+
+.hero__texto {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  max-width: 700px;
+  padding: 0 20px;
+}
+
+.lema {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-accent);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.hero h1 {
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+.hero__fuente {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  z-index: 3;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.hero__fuente a {
+  color: var(--color-text-muted);
+}
+
+/* CONTENIDO PRINCIPAL */
+main {
+  max-width: 800px;
+  margin: -30px auto 0;
+  padding: 0 20px 60px;
+  position: relative;
+  z-index: 10;
+}
+
+.seccion {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 35px;
+  margin-bottom: 30px;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.3s ease;
+}
+
+.seccion:hover {
+  border-color: #3a3f44;
+}
+
+.seccion h2 {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: #fff;
+  margin-bottom: 22px;
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+.seccion p {
+  font-size: 0.98rem;
+  color: var(--color-text-main);
+  margin-bottom: 14px;
+  text-align: justify;
+}
+
+.seccion strong {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* Ficha técnica */
+.creadores-box {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--color-border);
+}
+
+.creadores-box p {
+  margin-bottom: 8px;
+}
+
+.creadores-box ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.creadores-box li {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 30px 20px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+footer a {
+  color: var(--color-accent);
+}
+
+@media (max-width: 600px) {
+  .hero h1 {
+    font-size: 2.2rem;
+  }
+
+  .seccion {
+    padding: 22px;
+  }
+}
+</style>
+</head>
+<body>
+
+<a class="salto" href="#contenido">Saltar al contenido</a>
+
+<!-- HEADER / HERO -->
+<header class="hero">
+  <img
+    class="hero__img"
+    src="images/gta4-portada.jpg"
+    alt="Niko Bellic, protagonista de Grand Theft Auto IV, junto al logo del juego y un puente al fondo"
+  />
+
+  <div class="hero__texto">
+    <p class="lema">Liberty City te espera</p>
+    <h1>Grand Theft Auto IV</h1>
+  </div>
+
+  <p class="hero__fuente">
+    Imagen: <a href="https://vandal.elespanol.com/noticia/1350749313/grand-theft-auto-4-remasterizado-esta-en-desarrollo-y-se-lanzara-en-2023-segun-un-rumor/">Rockstar Games, vía Vandal</a>
+  </p>
+</header>
+
+<!-- CONTENIDO PRINCIPAL -->
+<main id="contenido">
+
+  <section class="seccion">
+    <h2>Resumen General</h2>
+    <div>
+      <p>
+        <strong>Grand Theft Auto IV</strong> es un videojuego de acción y aventura en mundo abierto ambientado en <strong>Liberty City</strong>, una ciudad inspirada en Nueva York. Cuenta la historia de <strong>Niko Bellic</strong>, un inmigrante de Europa del Este que llega a Estados Unidos atraído por la promesa de su primo Roman de una vida mejor, el llamado «sueño americano». La realidad resulta ser muy distinta: deudas, mafias y un pasado del que Niko no consigue escapar.
+      </p>
+
+      <p>
+        La jugabilidad mezcla <strong>conducción, tiroteos con sistema de coberturas y misiones</strong> que se desbloquean avanzando en la historia. Entre misión y misión puedes recorrer la ciudad libremente, usar el móvil para quedar con amigos y conocidos, y enfrentarte a la policía cuando tu nivel de búsqueda sube. El tono es más realista y oscuro que el de entregas anteriores de la saga.
+      </p>
+
+      <p>
+        Además del modo historia, incluye un modo <strong>multijugador online</strong> para hasta 16 jugadores en las versiones de consola.
+      </p>
+
+      <!-- Ficha técnica -->
+      <div class="creadores-box">
+        <p><strong>Ficha técnica:</strong></p>
+        <ul>
+          <li><strong>Año de lanzamiento:</strong> 2008 (consolas en abril, PC en diciembre)</li>
+          <li><strong>Estudio desarrollador:</strong> Rockstar North</li>
+          <li><strong>Editora:</strong> Rockstar Games</li>
+          <li><strong>Plataformas:</strong> PlayStation 3, Xbox 360 y PC (Windows)</li>
+          <li><strong>Género:</strong> Acción y aventura de mundo abierto</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <h2>Por qué es mi favorito</h2>
+    <p>
+      GTA IV es mi videojuego favorito de todos los tiempos, sobre todo por cómo se siente al jugarlo. Sus físicas hacen que todo tenga peso: los coches derrapan y se estrellan de forma creíble y los personajes reaccionan a cada golpe, así que ninguna persecución ni tiroteo sale igual dos veces.
+    </p>
+    <p>
+      A eso se suma la nostalgia: cada vez que lo veo o lo juego me devuelve a la época en la que lo descubrí. Para mí sigue siendo la vara de medir de lo que debería ser un buen mundo abierto.
+    </p>
+  </section>
+
+  <section class="seccion">
+    <h2>Autoría</h2>
+    <p>
+      Página creada por
+      <a href="https://github.com/rubenfilgueira"><strong>rubenfilgueira</strong></a>
+      como aportación al repositorio.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <p>&copy; Grand Theft Auto IV · Aportación de <a href="https://github.com/rubenfilgueira">rubenfilgueira</a></p>
+</footer>
+
+</body>
+</html>
